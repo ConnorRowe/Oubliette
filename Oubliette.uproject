@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.18",
+	"EngineAssociation": "4.20",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -12,6 +12,16 @@
 				"Engine",
 				"AIModule"
 			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "Niagara",
+			"Enabled": true
+		},
+		{
+			"Name": "NiagaraExtras",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
