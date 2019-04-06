@@ -115,10 +115,130 @@ TArray<FRoomData> ALevelGenerator::generateLevels()
 	return roomData;
 }
 
+TArray<FWallData> ALevelGenerator::generateWalls()
+{
+	int32 xWallIDs[51][51];
+	int32 xWallRots[51][51];
+	int32 yWallIDs[51][51];
+	int32 yWallRots[51][51];
+
+	for (int x = 0; x < xSize; ++x)
+	{
+		for (int y = 0; y < ySize; ++y)
+		{
+			//If room exists
+			if (roomIDs[x][y] == 1)
+			{
+				//Room is completely left / right
+				if (x == 0 || x == xSize)
+				{
+					xWallIDs[x][y] = 1;
+					xWallRots[x][y] = 0;
+				}
+				//Room is completly top / bottom
+				if (y == 1 || y == ySize)
+				{
+					yWallIDs[x+1][y] = 1;
+					yWallRots[x+1][y] = 90;
+				}
+
+				//There is a room to the right - needs a door
+				if (roomIDs[x + 1][y] != 0)
+				{
+					xWallIDs[x+1][y] = 2;
+					xWallRots[x+1][y] = 0;
+				}
+
+
+				//There is NOT a room to the right - needs a normal wall
+				if (roomIDs[x + 1][y] == 0)
+				{
+					xWallIDs[x+1][y] = 1;
+					xWallRots[x+1][y] = 0;
+				}
+				//There is NOT a room to the left - needs a normal wall
+				if (roomIDs[x - 1][y] == 0)
+				{
+					xWallIDs[x][y] = 1;
+					xWallRots[x][y] = 0;
+				}
+
+				//There is a room to the bottom - needs a door
+				if (roomIDs[x][y + 1] != 0)
+				{
+					yWallIDs[x][y+1] = 2;
+					yWallRots[x][y+1] = 90;
+				}
+				//There is NOT a room to the bottom - needs a normal wall
+				if (roomIDs[x][y + 1] == 0)
+				{
+					yWallIDs[x][y+1] = 1;
+					yWallRots[x][y+1] = 90;
+				}
+				//There is NOT a room to the top - needs a normal wall
+				if (roomIDs[x][y - 1] == 0)
+				{
+					yWallIDs[x][y] = 1;
+					yWallRots[x][y] = 90;
+				}
+			}
+		}
+	}
+
+	TArray<FWallData> wallData;
+	FWallData tempData;
+
+	//Parse the wallIDs array to and convert to a TArray that blueprints understand then return it
+	for (int x = 0; x < xSize + 1; ++x)
+	{
+		for (int y = 0; y < ySize + 1; ++y)
+		{
+			if (xWallIDs[x][y] != 0)
+			{
+				tempData.wallType = xWallIDs[x][y];
+				tempData.xPos = x;
+				tempData.yPos = y;
+				tempData.zRot = xWallRots[x][y];
+
+				wallData.Emplace(tempData);
+			}
+
+			if (yWallIDs[x][y] != 0)
+			{
+				tempData.wallType = yWallIDs[x][y];
+				tempData.xPos = x;
+				tempData.yPos = y;
+				tempData.zRot = yWallRots[x][y];
+
+				wallData.Emplace(tempData);
+			}
+		}
+	}
+	
+	return wallData;
+}
+
 void ALevelGenerator::setGenInfo(int32 xsize, int32 ysize, int32 numrooms)
 {
-	xSize = xsize;
-	ySize = ysize;
-	numRooms = numrooms;
+	if (xsize >= 50)
+	{
+		xSize = 50;
+	}
+	else
+		xSize = xsize;
+
+	if (ysize >= 50)
+	{
+		ySize = 50;
+	}
+	else
+		ySize = ysize;
+
+	if (numRooms >= 2500)
+	{
+		numRooms = 2500;
+	}
+	else
+		numRooms = numrooms;
 }
 

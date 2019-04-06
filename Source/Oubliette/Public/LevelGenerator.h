@@ -19,6 +19,21 @@ struct FRoomData
 	int32 roomType = 0;
 };
 
+USTRUCT(BluePrintType)
+struct FWallData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "Wall Data")
+	int32 xPos = 0;
+	UPROPERTY(BlueprintReadWrite, Category = "Wall Data")
+	int32 yPos = 0;
+	UPROPERTY(BlueprintReadWrite, Category = "Wall Data")
+	int32 wallType = 0;
+	UPROPERTY(BlueprintReadWrite, Category = "Wall Data")
+	int32 zRot = 0;
+};
+
 UCLASS()
 class OUBLIETTE_API ALevelGenerator : public AActor
 {
@@ -39,6 +54,8 @@ public:
 	void setGenInfo(int32 xsize, int32 ysize, int32 numrooms);
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
 	TArray<FRoomData> generateLevels();
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	TArray<FWallData> generateWalls();
 
 
 	UPROPERTY(BlueprintReadWrite, Category = "Level Generation")
@@ -52,6 +69,6 @@ public:
 	TArray<FRoomData> roomData;
 	
 private:
-	int32 roomIDs[15][15];
+	int32 roomIDs[50][50];
 
 };
