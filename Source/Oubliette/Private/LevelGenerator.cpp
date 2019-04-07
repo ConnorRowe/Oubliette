@@ -193,7 +193,7 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 	{
 		for (int y = 0; y < ySize + 1; ++y)
 		{
-			if (xWallIDs[x][y] != 0)
+			if (xWallIDs[x][y] == 1 || xWallIDs[x][y] == 2)
 			{
 				tempData.wallType = xWallIDs[x][y];
 				tempData.xPos = x;
@@ -203,7 +203,7 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 				wallData.Emplace(tempData);
 			}
 
-			if (yWallIDs[x][y] != 0)
+			if (yWallIDs[x][y] == 1 || yWallIDs[x][y] == 2)
 			{
 				tempData.wallType = yWallIDs[x][y];
 				tempData.xPos = x;
