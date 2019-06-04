@@ -3,9 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameModeOubliette.h"
+#include "CollisionQueryParams.h"
 #include "GameFramework/Character.h"
 #include "GenericTeamAgentInterface.h"
 #include "OublietteCharacter.generated.h"
+
+USTRUCT(BlueprintType)
+struct FLineTraceData
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadWrite, Category = "Line Trace")
+	bool Return_Value;
+	UPROPERTY(BlueprintReadWrite, Category = "Line Trace")
+	FVector Location;
+};
 
 UCLASS()
 class OUBLIETTE_API AOublietteCharacter : public ACharacter, public IGenericTeamAgentInterface
@@ -31,5 +44,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-	
+	UFUNCTION(BlueprintCallable, Category = "Character")
+	FLineTraceData tryLineTrace(float traceLength, USceneComponent* startComp);
 };

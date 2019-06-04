@@ -2,7 +2,6 @@
 
 #include "OublietteCharacter.h"
 
-
 // Sets default values
 AOublietteCharacter::AOublietteCharacter()
 {
@@ -37,4 +36,44 @@ void AOublietteCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 FGenericTeamId AOublietteCharacter::GetGenericTeamId() const
 {
 	return TeamId;
+}
+
+//attempt a single line trace from a given component
+FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneComponent* startComp)
+{
+	TArray<AActor*> ignoredActors;
+	FCollisionQueryParams RV_TraceParams;
+	FVector tStart = startComp->GetComponentLocation();
+	FVector tEnd = tStart + (startComp->GetForwardVector() * traceLength);
+
+	//get game mode
+	AGameModeOubliette* gm = (AGameModeOubliette*)GetWorld()->GetAuthGameMode();
+
+	//ignore all room objects as well as self
+	ignoredActors.Append(gm->allRooms);
+
+	//setup trace parameters
+	RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
+	RV_TraceParams.bTraceComplex = true;
+	RV_TraceParams.bReturnPhysicalMaterial = false;
+	RV_TraceParams.AddIgnoredActors(ignoredActors);
+
+	//Re-initialize hit info
+	FHitResult RV_Hit(ForceInit);
+
+	//call GetWorld() from within an actor extending class
+	GetWorld()->LineTraceSingleByChannel(
+		RV_Hit,			//result
+		tStart,			//start
+		tEnd,			//end
+		ECC_Pawn,		//collision channel
+		RV_TraceParams
+	);
+
+	FLineTraceData tData;
+
+	tData.Location = RV_Hit.Location;
+	tData.Return_Value = RV_Hit.bBlockingHit;
+	
+	return tData;
 }
