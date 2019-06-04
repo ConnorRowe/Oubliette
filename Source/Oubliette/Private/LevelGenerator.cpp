@@ -2,7 +2,7 @@
 
 #include "LevelGenerator.h"
 #include "CoreMinimal.h"
-
+#include "Engine/World.h"
 
 // Sets default values
 ALevelGenerator::ALevelGenerator()
@@ -25,7 +25,7 @@ void ALevelGenerator::Tick(float DeltaTime)
 
 }
 
-TArray<FRoomData> ALevelGenerator::generateLevels()
+TArray<FRoomData> ALevelGenerator::generateRooms()
 {
 	roomData.Empty();
 	
@@ -218,27 +218,102 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 	return wallData;
 }
 
-void ALevelGenerator::setGenInfo(int32 xsize, int32 ysize, int32 numrooms)
+//From the rooms generated from the generateLevels function, this spawns all the necessary objects into the world
+void ALevelGenerator::spawnLevel()
 {
-	if (xsize >= 50)
+	//Starting location for room
+	const float roomStart = roomSize + roomMargins;
+	//Reference to the game mode
+	AGameModeOubliette* gm = (AGameModeOubliette*)GetWorld()->GetAuthGameMode();
+	//Reference to the game instance
+	UGameInstanceOubliette* gi = (UGameInstanceOubliette*)GetWorld()->GetGameInstance();
+	FActorSpawnParameters spawnParams;
+
+	//Generate the room data
+	TArray<FRoomData> rooms = generateRooms();
+
+	//Spawn all room actors
+	for (int i = 0; i < rooms.Num(); ++i)
+	{
+		//Calculate a new room location depending on the current rooms x and y positions
+		FVector roomLoc = FVector(roomStart * rooms[i].xPos, roomStart * rooms[i].yPos, 0.0f) - FVector((roomStart * xSize) / 2);
+		roomLoc.Z = 0.0f;
+
+		//Spawn the room actor and add it to the allRooms array in the game mode
+		AActor* newRoom = GetWorld()->SpawnActor<AActor>(roomBP, roomLoc, FRotator(0.0f), spawnParams);
+		gm->allRooms.Emplace(newRoom);
+
+		//If it is the first room, spawn the character, possess it, and set reference in the game instance
+		if (i == 0)
+		{
+			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+			AOublietteCharacter* newChar = GetWorld()->SpawnActor<AOublietteCharacter>(charBP, roomLoc + FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
+			APlayerController* conRef = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+			conRef->Possess(newChar);
+			gi->charRef = newChar;
+		}
+	}
+
+	//Generate walls from the rooms data
+	TArray<FWallData> newWalls = generateWalls();
+
+	//Walls should always be spawned, no matter the collision
+	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	UClass* wallClass = NULL;
+
+	//Spawn all wall and door actors
+	for (int i = 0; i < newWalls.Num(); ++i)
+	{
+		//If the wall type is 0 then no wall should be spawned in that location
+		if (newWalls[i].wallType > 0)
+		{
+			FVector wallLoc = FVector(roomStart * newWalls[i].xPos, roomStart * newWalls[i].yPos, 0.0f) - FVector((roomStart * xSize) / 2);
+			wallLoc.Z = 0;
+
+			if (newWalls[i].zRot > 0)
+				wallLoc.Y -= roomStart / 2;
+			else
+				wallLoc.X -= roomStart / 2;
+
+			if (newWalls[i].wallType == 1)
+				wallClass = wallBP;
+			else if (newWalls[i].wallType == 2)
+				wallClass = wallDoorBP;
+
+			GetWorld()->SpawnActor<AActor>(wallClass, wallLoc, FRotator(0.0f, (float)newWalls[i].zRot, 0.0f), spawnParams);
+		}
+	}
+}
+
+//Sets all the variables needed to generate and spawn a level
+void ALevelGenerator::setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallBP, UClass* WallDoorBP, UClass* CharBP)
+{
+	if (XSize >= 50)
 	{
 		xSize = 50;
 	}
 	else
-		xSize = xsize;
+		xSize = XSize;
 
-	if (ysize >= 50)
+	if (YSize >= 50)
 	{
 		ySize = 50;
 	}
 	else
-		ySize = ysize;
+		ySize = YSize;
 
-	if (numRooms >= 2500)
+	if (NumRooms >= 2500)
 	{
 		numRooms = 2500;
 	}
 	else
-		numRooms = numrooms;
+		numRooms = NumRooms;
+
+	roomSize = RoomSize;
+	roomMargins = RoomMargins;
+	roomBP = RoomBP;
+	wallBP = WallBP;
+	wallDoorBP = WallDoorBP;
+	charBP = CharBP;
 }
 

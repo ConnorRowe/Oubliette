@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameModeOubliette.h"
+#include "GameInstanceOubliette.h"
+#include "OublietteCharacter.h"
 #include "LevelGenerator.generated.h"
 
 USTRUCT(BlueprintType)
@@ -51,24 +55,24 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void setGenInfo(int32 xsize, int32 ysize, int32 numrooms);
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	TArray<FRoomData> generateLevels();
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallBP, UClass* WallDoorBP, UClass* CharBP);
+	TArray<FRoomData> generateRooms();
 	TArray<FWallData> generateWalls();
-
-
-	UPROPERTY(BlueprintReadWrite, Category = "Level Generation")
-	int32 xSize;
-	UPROPERTY(BlueprintReadWrite, Category = "Level Generation")
-	int32 ySize;
-	UPROPERTY(BlueprintReadWrite, Category = "Level Generation")
-	int32 numRooms;
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void spawnLevel();
 
 	UPROPERTY(BlueprintReadOnly, Category = "Level Generation")
 	TArray<FRoomData> roomData;
 	
 private:
 	int32 roomIDs[50][50];
-
+	int32 xSize;
+	int32 ySize;
+	int32 numRooms;
+	int32 roomSize;
+	int32 roomMargins;
+	UClass* roomBP;
+	UClass* wallBP;
+	UClass* wallDoorBP;
+	UClass* charBP;
 };
