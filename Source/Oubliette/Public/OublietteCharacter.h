@@ -46,4 +46,30 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	FLineTraceData tryLineTrace(float traceLength, USceneComponent* startComp);
+
+	//Gameplay variables
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
+	int32 HealthCurrent;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
+	int32 HealthMax;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
+	bool bIsDead;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
+	bool bInputEnabled;
+
+	//Spell vars
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	bool bIsAttackingL;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	bool bIsAttackingR;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	bool bCanAttackL = true;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	bool bCanAttackR = true;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	float ManaCurrent;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	float manaMax;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	float manaRecharge;
 };
