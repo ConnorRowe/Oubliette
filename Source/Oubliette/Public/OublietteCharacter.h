@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Oubliette.h"
 #include "GameModeOubliette.h"
 #include "CollisionQueryParams.h"
 #include "GameFramework/Character.h"
@@ -44,7 +45,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
-	UFUNCTION(BlueprintCallable, Category = "Character")
+	UFUNCTION(BlueprintCallable, Category = "Character | Utility")
 	FLineTraceData tryLineTrace(float traceLength, USceneComponent* startComp);
 
 	//Gameplay variables
@@ -72,4 +73,11 @@ public:
 	float manaMax;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	float manaRecharge;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	EHandEnum HandEnumNEW = EHandEnum::HE_Left;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	FOffensiveSpellStructNEW ActiveSpellRNew;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	ESpellUtilsEnum ActiveSpellLNew;
 };

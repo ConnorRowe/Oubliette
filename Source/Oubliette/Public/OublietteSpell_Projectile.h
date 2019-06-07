@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/BlueprintFunctionLibrary.h"
-#include "OublietteBPFLib.generated.h"
+#include "OublietteSpell.h"
+#include "OublietteSpell_Projectile.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class OUBLIETTE_API UOublietteBPFLib : public UBlueprintFunctionLibrary
+class OUBLIETTE_API AOublietteSpell_Projectile : public AOublietteSpell
 {
 	GENERATED_BODY()
-
+	
 };
