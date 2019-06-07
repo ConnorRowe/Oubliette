@@ -249,6 +249,9 @@ void ALevelGenerator::spawnLevel()
 			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 			AOublietteCharacter* newChar = GetWorld()->SpawnActor<AOublietteCharacter>(charBP, roomLoc + FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
 			APlayerController* conRef = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+			conRef->GetPawn()->Destroy();
+
 			conRef->Possess(newChar);
 			gi->charRef = newChar;
 		}
