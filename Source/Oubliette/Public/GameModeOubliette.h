@@ -20,12 +20,12 @@ public:
 	TArray<AActor*> allRooms;
 	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
 	TArray<AActor*> allWallsDoors;
-	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
-	TArray<FSpellProjectileStructNEW> Spells_Projectile;
-	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
-	TArray<FSpellChannelStructNEW> Spells_Channel;
-	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
-	TArray<FSpellHitScanStructNEW> Spells_HitScan;
-	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
-	TArray<FSpellUtilStructNEW> Spells_Utility;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
+	TArray<FSpellProjectileStruct> Spells_Projectile;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
+	TArray<FSpellChannelStruct> Spells_Channel;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
+	TArray<FSpellHitScanStruct> Spells_HitScan;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
+	TArray<FSpellUtilStruct> Spells_Utility;
 };

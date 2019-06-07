@@ -63,7 +63,7 @@ enum class EStatsEnum : uint8
 #pragma region STRUCTS
 
 USTRUCT(BlueprintType)
-struct FActiveSpellStructNEW
+struct FActiveSpellStruct
 {
 	GENERATED_BODY()
 
@@ -74,7 +74,7 @@ struct FActiveSpellStructNEW
 };
 
 USTRUCT(BlueprintType)
-struct FOffensiveSpellStructNEW
+struct FOffensiveSpellStruct
 {
 	GENERATED_BODY()
 
@@ -85,7 +85,7 @@ struct FOffensiveSpellStructNEW
 };
 
 USTRUCT(BlueprintType)
-struct FSpellUtilStructNEW
+struct FSpellUtilStruct
 {
 	GENERATED_BODY()
 
@@ -101,7 +101,7 @@ struct FSpellUtilStructNEW
 
 
 USTRUCT(BlueprintType)
-struct FSpellProjectileStructNEW
+struct FSpellProjectileStruct
 {
 	GENERATED_BODY()
 
@@ -122,7 +122,7 @@ struct FSpellProjectileStructNEW
 };
 
 USTRUCT(BlueprintType)
-struct FSpellChannelStructNEW
+struct FSpellChannelStruct
 {
 	GENERATED_BODY()
 
@@ -143,7 +143,7 @@ struct FSpellChannelStructNEW
 };
 
 USTRUCT(BlueprintType)
-struct FSpellHitScanStructNEW
+struct FSpellHitScanStruct
 {
 	GENERATED_BODY()
 
@@ -207,7 +207,7 @@ struct FTalentToolTipStructNEW
 };
 
 USTRUCT(BlueprintType)
-struct FLineageSaveStructNEW
+struct FLineageSaveStruct
 {
 	GENERATED_BODY()
 

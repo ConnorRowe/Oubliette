@@ -81,7 +81,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	EHandEnum HandEnumNEW = EHandEnum::HE_Left;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	FOffensiveSpellStructNEW ActiveSpellRNew;
+	FOffensiveSpellStruct ActiveSpellRNew;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	ESpellUtilsEnum ActiveSpellLNew;
 };
