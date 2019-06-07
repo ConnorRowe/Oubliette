@@ -17,8 +17,8 @@
 UENUM(BlueprintType)
 enum class EHandEnum : uint8
 {
-	HE_Left		UMETA(DisplayName = "Left"),
-	HE_Right	UMETA(DisplayName = "Right")
+	HE_Right		UMETA(DisplayName = "Right"),
+	HE_Left			UMETA(DisplayName = "Left")
 };
 
 UENUM(BlueprintType)
