@@ -283,7 +283,7 @@ void ALevelGenerator::spawnLevel()
 			else if (newWalls[i].wallType == 2)
 				wallClass = wallDoorBP;
 
-			GetWorld()->SpawnActor<AActor>(wallClass, wallLoc, FRotator(0.0f, (float)newWalls[i].zRot, 0.0f), spawnParams);
+			gm->allWallsDoors.Emplace(GetWorld()->SpawnActor<AActor>(wallClass, wallLoc, FRotator(0.0f, (float)newWalls[i].zRot, 0.0f), spawnParams));
 		}
 	}
 }

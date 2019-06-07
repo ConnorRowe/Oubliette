@@ -15,10 +15,14 @@ struct FLineTraceData
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(BlueprintReadWrite, Category = "Line Trace")
+	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
 	bool Return_Value;
-	UPROPERTY(BlueprintReadWrite, Category = "Line Trace")
+	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
 	FVector Location;
+	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
+	FVector TraceStart;
+	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
+	FVector TraceEnd;
 };
 
 UCLASS()

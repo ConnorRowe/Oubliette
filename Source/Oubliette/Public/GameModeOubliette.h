@@ -18,12 +18,14 @@ class OUBLIETTE_API AGameModeOubliette : public AGameModeBase
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
 	TArray<AActor*> allRooms;
-	UPROPERTY(BlueprintReadOnly, Category = "Game Mode")
+	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
+	TArray<AActor*> allWallsDoors;
+	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
 	TArray<FSpellProjectileStructNEW> Spells_Projectile;
-	UPROPERTY(BlueprintReadOnly, Category = "Game Mode")
+	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
 	TArray<FSpellChannelStructNEW> Spells_Channel;
-	UPROPERTY(BlueprintReadOnly, Category = "Game Mode")
+	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
 	TArray<FSpellHitScanStructNEW> Spells_HitScan;
-	UPROPERTY(BlueprintReadOnly, Category = "Game Mode")
+	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
 	TArray<FSpellUtilStructNEW> Spells_Utility;
 };

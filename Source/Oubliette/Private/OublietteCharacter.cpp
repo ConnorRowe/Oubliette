@@ -75,6 +75,8 @@ FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneCompon
 
 	tData.Location = RV_Hit.Location;
 	tData.Return_Value = RV_Hit.bBlockingHit;
+	tData.TraceEnd = RV_Hit.TraceEnd;
+	tData.TraceStart = RV_Hit.TraceStart;
 	
 	return tData;
 }
