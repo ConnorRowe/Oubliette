@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/Classes/Engine/DataTable.h"
-#include "Engine/Classes/Engine/Texture2D.h"
+#include "Engine/Classes/Materials/Material.h"
 #include "Engine/Classes/Particles/ParticleSystem.h"
 #include "Engine/Classes/Sound/SoundCue.h"
 #include "Engine/Classes/GameFramework/DamageType.h"
@@ -50,12 +50,18 @@ enum class EStatsEnum : uint8
 {
 	ESA_NONE,
 	ESA_Intellect	UMETA(DisplayName = "Intellect"),
-	ESA_Wisdom		UMETA(DisplayName = "Intellect"),
-	ESA_Agility		UMETA(DisplayName = "Intellect"),
-	ESA_BonusFire	UMETA(DisplayName = "Intellect"),
-	ESA_BonusFrost	UMETA(DisplayName = "Intellect"),
-	ESA_BonusShock	UMETA(DisplayName = "Intellect"),
-	ESA_BonusShadow	UMETA(DisplayName = "Intellect")
+	ESA_Wisdom		UMETA(DisplayName = "Wisdom"),
+	ESA_Agility		UMETA(DisplayName = "Agility"),
+	ESA_BonusFire	UMETA(DisplayName = "Bonus Fire"),
+	ESA_BonusFrost	UMETA(DisplayName = "Bonus Frost"),
+	ESA_BonusShock	UMETA(DisplayName = "Bonus Shock"),
+	ESA_BonusShadow	UMETA(DisplayName = "Bonus Shadow")
+};
+
+UENUM(BlueprintType)
+enum class EItemEffectEnum : uint8
+{
+	EIE_NONE
 };
 
 #pragma endregion ENUMS
@@ -162,7 +168,7 @@ struct FSpellHitScanStruct
 };
 
 USTRUCT(BlueprintType)
-struct FStatStructNEW
+struct FStatStruct
 {
 	GENERATED_BODY()
 
@@ -173,7 +179,7 @@ struct FStatStructNEW
 };
 
 USTRUCT(BlueprintType)
-struct FItemStructNEW
+struct FItemStruct
 {
 	GENERATED_BODY()
 
@@ -186,11 +192,22 @@ struct FItemStructNEW
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FText Suffix;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FName Effect;
+	EItemEffectEnum Effect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	UTexture2D* IconTexture;
+	float EffectMagnitude;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FStatStructNEW Stats;
+	TArray<FStatStruct> Stats;
+
+	//visual stuff
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	UMaterialInterface* Material;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FLinearColor RColour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FLinearColor GColour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FLinearColor BColour;
+
 };
 
 USTRUCT(BlueprintType)
