@@ -197,6 +197,8 @@ struct FItemStruct
 	float EffectMagnitude;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	TArray<FStatStruct> Stats;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FText FlavourText;
 
 	//visual stuff
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
