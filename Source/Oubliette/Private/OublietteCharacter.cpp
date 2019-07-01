@@ -57,7 +57,6 @@ FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneCompon
 	RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
 	RV_TraceParams.bTraceComplex = true;
 	RV_TraceParams.bReturnPhysicalMaterial = false;
-	RV_TraceParams.AddIgnoredActors(ignoredActors);
 
 	//Re-initialize hit info
 	FHitResult RV_Hit(ForceInit);
