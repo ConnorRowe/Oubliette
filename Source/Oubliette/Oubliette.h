@@ -64,6 +64,14 @@ enum class EItemEffectEnum : uint8
 	EIE_NONE
 };
 
+UENUM(BlueprintType)
+enum class EItemTypeEnum : uint8
+{
+	ITE_Active	UMETA(DisplayName = "Active"),
+	ITE_Trinket	UMETA(DisplayName = "Trinket"),
+	ITE_Ring	UMETA(DisplayName = "Ring")
+};
+
 #pragma endregion ENUMS
 
 #pragma region STRUCTS
@@ -199,6 +207,8 @@ struct FItemStruct
 	TArray<FStatStruct> Stats;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FText FlavourText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	EItemTypeEnum ItemType;
 
 	//visual stuff
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
