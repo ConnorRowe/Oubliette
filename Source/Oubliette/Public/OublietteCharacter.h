@@ -23,6 +23,10 @@ struct FLineTraceData
 	FVector TraceStart;
 	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
 	FVector TraceEnd;
+	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
+	TWeakObjectPtr<class AActor> HitActor;
+	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
+	float Distance;
 };
 
 UCLASS()
@@ -84,4 +88,9 @@ public:
 	FOffensiveSpellStruct ActiveSpellRNew;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	ESpellUtilsEnum ActiveSpellLNew;
+
+	//Items
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Inventory")
+	TArray<FItemStruct> Inventory;
+
 };
