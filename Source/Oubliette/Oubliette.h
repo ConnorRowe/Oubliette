@@ -223,6 +223,43 @@ struct FItemStruct
 };
 
 USTRUCT(BlueprintType)
+struct FItemDataTableStruct : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	int32 id;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	int32 Rarity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FString Prefix = "rand";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FString Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FString Suffix = "rand";
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	EItemEffectEnum Effect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	float EffectMagnitude;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<FStatStruct> Stats;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FText FlavourText;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	EItemTypeEnum ItemType;
+
+	//visual stuff
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	UMaterialInterface* Material;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FLinearColor RColour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FLinearColor GColour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FLinearColor BColour;
+};
+
+USTRUCT(BlueprintType)
 struct FTalentToolTipStructNEW
 {
 	GENERATED_BODY()

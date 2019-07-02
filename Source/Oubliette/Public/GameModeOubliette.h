@@ -28,6 +28,6 @@ public:
 	TArray<FSpellHitScanStruct> Spells_HitScan;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
 	TArray<FSpellUtilStruct> Spells_Utility;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
-	TArray<FItemStruct> ItemPool_General;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
+	TArray<FItemStruct> ItemPool_GeneralChest;
 };
