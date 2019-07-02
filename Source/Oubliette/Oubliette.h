@@ -260,6 +260,25 @@ struct FItemDataTableStruct : public FTableRowBase
 };
 
 USTRUCT(BlueprintType)
+struct FItemPoolStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<FItemStruct> Poor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<FItemStruct> Common;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<FItemStruct> Uncommon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<FItemStruct> Rare;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<FItemStruct> Epic;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<FItemStruct> Legendary;
+};
+
+USTRUCT(BlueprintType)
 struct FTalentToolTipStructNEW
 {
 	GENERATED_BODY()

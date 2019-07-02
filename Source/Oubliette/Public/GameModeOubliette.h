@@ -29,5 +29,5 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
 	TArray<FSpellUtilStruct> Spells_Utility;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
-	TArray<FItemStruct> ItemPool_GeneralChest;
+	FItemPoolStruct ItemPool_GeneralChest;
 };
