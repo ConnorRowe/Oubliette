@@ -265,8 +265,6 @@ struct FItemPoolStruct
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FItemStruct> Poor;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	TArray<FItemStruct> Common;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	TArray<FItemStruct> Uncommon;
