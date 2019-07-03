@@ -52,10 +52,16 @@ enum class EStatsEnum : uint8
 	ESA_Intellect	UMETA(DisplayName = "Intellect"),
 	ESA_Wisdom		UMETA(DisplayName = "Wisdom"),
 	ESA_Agility		UMETA(DisplayName = "Agility"),
-	ESA_BonusFire	UMETA(DisplayName = "Bonus Fire"),
-	ESA_BonusFrost	UMETA(DisplayName = "Bonus Frost"),
-	ESA_BonusShock	UMETA(DisplayName = "Bonus Shock"),
-	ESA_BonusShadow	UMETA(DisplayName = "Bonus Shadow")
+	ESA_BonusFire	UMETA(DisplayName = "Bonus Fire Damage"),
+	ESA_BonusFrost	UMETA(DisplayName = "Bonus Frost Damage"),
+	ESA_BonusShock	UMETA(DisplayName = "Bonus Shock Damage"),
+	ESA_BonusArcane UMETA(DisplayName = "Bonus Arcane Damage"),
+	ESA_BonusShadow	UMETA(DisplayName = "Bonus Shadow Damage"),
+	ESA_BonusXP		UMETA(DisplayName = "% Bonus XP"),
+	ESA_BetterLoot	UMETA(DisplayName = "% Better Chance of Finding Magical Items"),
+	ESA_DmgUndead	UMETA(DisplayName = "% Bonus Damage against Undead"),
+	ESA_DmgSlime	UMETA(DisplayName = "% Bonus Damage against Slimes"),
+	ESA_DmgCreatures UMETA(DisplayName = "% Bonus Damage against Creatures")
 };
 
 UENUM(BlueprintType)
