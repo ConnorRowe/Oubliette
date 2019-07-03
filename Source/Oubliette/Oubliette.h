@@ -279,6 +279,17 @@ struct FItemPoolStruct
 };
 
 USTRUCT(BlueprintType)
+struct FItemAffixStruct : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	FName Affix;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<FStatStruct> Stats;
+};
+
+USTRUCT(BlueprintType)
 struct FTalentToolTipStructNEW
 {
 	GENERATED_BODY()
