@@ -29,4 +29,8 @@ public:
 	bool isOpening = false;
 	UPROPERTY(BlueprintReadWrite, Category = "Chest")
 	bool isOpen = false;
+	UPROPERTY(BlueprintReadWrite, Category = "Chest")
+	bool isSelected = false;
+	UPROPERTY(BlueprintReadWrite, Category = "Chest")
+	bool itemExists = false;
 };
