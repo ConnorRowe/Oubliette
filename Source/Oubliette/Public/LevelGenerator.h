@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameModeOubliette.h"
+#include "Engine/Classes/Components/InstancedStaticMeshComponent.h"
 #include "GameInstanceOubliette.h"
 #include "OublietteCharacter.h"
 #include "LevelGenerator.generated.h"
@@ -41,19 +42,16 @@ struct FWallData
 UCLASS()
 class OUBLIETTE_API ALevelGenerator : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	ALevelGenerator();
+	GENERATED_UCLASS_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Level Generation")
+	class UInstancedStaticMeshComponent* WallMeshInstances;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+public:
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
 	void setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallBP, UClass* WallDoorBP, UClass* CharBP);
 	TArray<FRoomData> generateRooms();
@@ -63,7 +61,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Level Generation")
 	TArray<FRoomData> roomData;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category = "Room")
+	UStaticMesh* wallMesh;
+
+	void spawnRegWall(const FVector Location, const float ZRot);
+
 private:
 	int32 roomIDs[50][50];
 	int32 xSize;
@@ -75,4 +78,5 @@ private:
 	UClass* wallBP;
 	UClass* wallDoorBP;
 	UClass* charBP;
+
 };

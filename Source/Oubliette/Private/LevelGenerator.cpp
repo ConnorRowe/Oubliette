@@ -5,10 +5,14 @@
 #include "Engine/World.h"
 
 // Sets default values
-ALevelGenerator::ALevelGenerator()
+ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// Create ISM component
+	WallMeshInstances = ObjectInitializer.CreateDefaultSubobject<UInstancedStaticMeshComponent>(this, TEXT("WallMeshInstances"));
+
+	// Must set root component;
+	RootComponent = WallMeshInstances;
 }
 
 // Called when the game starts or when spawned
@@ -16,19 +20,25 @@ void ALevelGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 
+	WallMeshInstances->SetStaticMesh(wallMesh);
+
 }
 
-// Called every frame
-void ALevelGenerator::Tick(float DeltaTime)
+void ALevelGenerator::spawnRegWall(const FVector Location, const float ZRot)
 {
-	Super::Tick(DeltaTime);
+	// Set up transform for the wall
+	FTransform wallTransform;
+	wallTransform.SetLocation(Location);
+	wallTransform.SetRotation(FQuat(FRotator(0.0f, ZRot, 0.0f)));
 
+	// Spawn wall instance
+	WallMeshInstances->AddInstance(wallTransform);
 }
 
 TArray<FRoomData> ALevelGenerator::generateRooms()
 {
 	roomData.Empty();
-	
+
 	//Parse array, setting all room IDs to 0 (empty)
 	for (int x = 0; x < xSize; ++x)
 	{
@@ -77,7 +87,7 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 
 			//Room space exists and is empty
 			//if (roomIDs[xPos + xD][yPos + yD] != NULL && roomIDs[xPos + xD][yPos + yD] == 0)
-			if (roomIDs[xPos + xD][yPos + yD] == 0 && (xPos+xD) < xSize && (yPos + yD) < ySize && (xPos + xD) >= 0 && (yPos + yD) >= 0)
+			if (roomIDs[xPos + xD][yPos + yD] == 0 && (xPos + xD) < xSize && (yPos + yD) < ySize && (xPos + xD) >= 0 && (yPos + yD) >= 0)
 			{
 				xPos += xD; yPos += yD;
 				//setting new ID
@@ -138,23 +148,23 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 				//Room is completly top / bottom
 				if (y == 1 || y == ySize)
 				{
-					yWallIDs[x+1][y] = 1;
-					yWallRots[x+1][y] = 90;
+					yWallIDs[x + 1][y] = 1;
+					yWallRots[x + 1][y] = 90;
 				}
 
 				//There is a room to the right - needs a door
 				if (roomIDs[x + 1][y] != 0)
 				{
-					xWallIDs[x+1][y] = 2;
-					xWallRots[x+1][y] = 0;
+					xWallIDs[x + 1][y] = 2;
+					xWallRots[x + 1][y] = 0;
 				}
 
 
 				//There is NOT a room to the right - needs a normal wall
 				if (roomIDs[x + 1][y] == 0)
 				{
-					xWallIDs[x+1][y] = 1;
-					xWallRots[x+1][y] = 0;
+					xWallIDs[x + 1][y] = 1;
+					xWallRots[x + 1][y] = 0;
 				}
 				//There is NOT a room to the left - needs a normal wall
 				if (roomIDs[x - 1][y] == 0)
@@ -166,14 +176,14 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 				//There is a room to the bottom - needs a door
 				if (roomIDs[x][y + 1] != 0)
 				{
-					yWallIDs[x][y+1] = 2;
-					yWallRots[x][y+1] = 90;
+					yWallIDs[x][y + 1] = 2;
+					yWallRots[x][y + 1] = 90;
 				}
 				//There is NOT a room to the bottom - needs a normal wall
 				if (roomIDs[x][y + 1] == 0)
 				{
-					yWallIDs[x][y+1] = 1;
-					yWallRots[x][y+1] = 90;
+					yWallIDs[x][y + 1] = 1;
+					yWallRots[x][y + 1] = 90;
 				}
 				//There is NOT a room to the top - needs a normal wall
 				if (roomIDs[x][y - 1] == 0)
@@ -214,7 +224,7 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 			}
 		}
 	}
-	
+
 	return wallData;
 }
 
@@ -262,7 +272,6 @@ void ALevelGenerator::spawnLevel()
 
 	//Walls should always be spawned, no matter the collision
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	UClass* wallClass = NULL;
 
 	//Spawn all wall and door actors
 	for (int i = 0; i < newWalls.Num(); ++i)
@@ -279,11 +288,10 @@ void ALevelGenerator::spawnLevel()
 				wallLoc.X -= roomStart / 2;
 
 			if (newWalls[i].wallType == 1)
-				wallClass = wallBP;
+				spawnRegWall(wallLoc, (float)newWalls[i].zRot);
 			else if (newWalls[i].wallType == 2)
-				wallClass = wallDoorBP;
+				gm->allWallsDoors.Emplace(GetWorld()->SpawnActor<AActor>(wallDoorBP, wallLoc, FRotator(0.0f, (float)newWalls[i].zRot, 0.0f), spawnParams));
 
-			gm->allWallsDoors.Emplace(GetWorld()->SpawnActor<AActor>(wallClass, wallLoc, FRotator(0.0f, (float)newWalls[i].zRot, 0.0f), spawnParams));
 		}
 	}
 }
