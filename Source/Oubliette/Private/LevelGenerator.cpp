@@ -3,6 +3,7 @@
 #include "LevelGenerator.h"
 #include "CoreMinimal.h"
 #include "Engine/World.h"
+#include "CoreUObject/Public/Uobject/ConstructorHelpers.h"
 
 // Sets default values
 ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
@@ -13,6 +14,83 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 
 	// Must set root component;
 	RootComponent = WallMeshInstances;
+
+	// Room object generation stuff
+
+	TArray<FObjectDataStruct> tempRoomData;
+	tempRoomData.Init(FObjectDataStruct(), 4);
+	tempRoomData[0] = FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, 300.0f, 0.0f), FRotator());
+	tempRoomData[1] = FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, -300.0f, 0.0f), FRotator());
+	tempRoomData[2] = FObjectDataStruct(EObjectTypeEnum::OTE_Table, FVector(600.0f, -600.0f, 0.0f), FRotator(0.0f, 180.0f, 0.0f));
+	tempRoomData[3] = FObjectDataStruct(EObjectTypeEnum::OTE_Chest, FVector(600.0f, 600.0f, 0.0f), FRotator(0.0f, 0.0f, 0.0f));
+
+	RoomSpawns_Standard.Init(RoomGenData(), 1);
+	RoomSpawns_Standard[0].roomType = 0;
+	RoomSpawns_Standard[0].objects = tempRoomData;
+
+	// Asset Loading
+	// Mesh loading
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> TableMeshObj(TEXT("/Game/Meshes/Static/SM_Table"));
+	TableMesh = TableMeshObj.Object;
+
+	//Blueprint loading
+	BP_Chest		= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/Items/BP_Chest.BP_Chest_C"));
+	BP_Slime		= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/AI/Enemies/BP_Enemy_Slime.BP_Enemy_Slime_C"));
+	BP_Slime_Fire	= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire_C"));
+	BP_Slime_Giant	= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant_C"));
+}
+
+void ALevelGenerator::GenerateObjects(AActor* targetRoom)
+{
+	int32 maxSize = RoomSpawns_Standard.Num() - 1;
+	int32 roomindex = FMath::RandRange(0, maxSize);
+
+	TArray<FObjectDataStruct> RoomData = RoomSpawns_Standard[roomindex].objects;
+
+	for (int i = 0; i < RoomData.Num(); ++i)
+	{
+		switch (RoomData[i].ObjectType)
+		{
+
+		case EObjectTypeEnum::OTE_Table:
+		{
+			UPROPERTY(EditAnywhere, Category = "Level Generation")
+			UStaticMeshComponent* TableComp = NewObject<UStaticMeshComponent>(targetRoom, FName("Table"));
+			TableComp->RegisterComponent();
+			TableComp->SetStaticMesh(TableMesh);
+			//TableComp->SetRelativeLocationAndRotation(RoomData[i].Location, RoomData[i].Rotation);
+			TableComp->SetWorldLocationAndRotation((targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation);
+			//TableComp->AttachTo(targetRoom->RootComponent, NAME_None, EAttachLocation::KeepRelativeOffset);
+			break;
+		}
+		case EObjectTypeEnum::OTE_Chest:
+		{
+			GetWorld()->SpawnActor<AActor>(BP_Chest, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+
+			break;
+		}
+		case EObjectTypeEnum::OTE_Enemy_Standard:
+		{
+			GetWorld()->SpawnActor<AActor>(BP_Slime, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+
+			break;
+		}
+		case EObjectTypeEnum::OTE_Enemy_Ranged:
+		{
+			GetWorld()->SpawnActor<AActor>(BP_Slime_Fire, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+
+			break;
+		}
+		case EObjectTypeEnum::OTE_Enemy_Large:
+		{
+			GetWorld()->SpawnActor<AActor>(BP_Slime_Giant, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+
+			break;
+		}
+		default:
+			break;
+		}
+	}
 }
 
 // Called when the game starts or when spawned
@@ -252,6 +330,7 @@ void ALevelGenerator::spawnLevel()
 		//Spawn the room actor and add it to the allRooms array in the game mode
 		AActor* newRoom = GetWorld()->SpawnActor<AActor>(roomBP, roomLoc, FRotator(0.0f), spawnParams);
 		gm->allRooms.Emplace(newRoom);
+		GenerateObjects(newRoom);
 
 		//If it is the first room, spawn the character, possess it, and set reference in the game instance
 		if (i == 0)

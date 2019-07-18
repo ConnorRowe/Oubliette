@@ -11,6 +11,39 @@
 #include "OublietteCharacter.h"
 #include "LevelGenerator.generated.h"
 
+// Enum of different spawnable objects for rooms
+enum class EObjectTypeEnum : uint8
+{
+	OTE_Table,
+	OTE_Enemy_Standard,
+	OTE_Enemy_Ranged,
+	OTE_Enemy_Large,
+	OTE_Chest
+};
+
+struct FObjectDataStruct
+{
+	EObjectTypeEnum ObjectType;
+	FVector Location;
+	FRotator Rotation;
+
+	FObjectDataStruct() {};
+
+	//Constructor
+	FObjectDataStruct(EObjectTypeEnum init_ObjectType, FVector init_Location, FRotator init_Rotation)
+	{
+		ObjectType = init_ObjectType;
+		Location = init_Location;
+		Rotation = init_Rotation;
+	}
+};
+
+struct RoomGenData
+{
+	int32 roomType;
+	TArray<FObjectDataStruct> objects;
+};
+
 USTRUCT(BlueprintType)
 struct FRoomData
 {
@@ -78,5 +111,14 @@ private:
 	UClass* wallBP;
 	UClass* wallDoorBP;
 	UClass* charBP;
+
+	//Room object stuff
+	TArray<RoomGenData> RoomSpawns_Standard;
+	void GenerateObjects(AActor* targetRoom);
+	UStaticMesh* TableMesh;
+	UClass* BP_Chest;
+	UClass* BP_Slime;
+	UClass* BP_Slime_Fire;
+	UClass* BP_Slime_Giant;
 
 };

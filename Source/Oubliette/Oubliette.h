@@ -78,6 +78,13 @@ enum class EItemTypeEnum : uint8
 	ITE_Ring	UMETA(DisplayName = "Ring")
 };
 
+UENUM(BlueprintType)
+enum class EEnemyTypesEnum : uint8
+{
+	ETE_Slime		UMETA(DisplayName = "Slime"),
+	ETE_Slime_Giant	UMETA(DisplayName = "Slime Giant")
+};
+
 #pragma endregion ENUMS
 
 #pragma region STRUCTS
