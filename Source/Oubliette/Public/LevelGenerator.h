@@ -9,6 +9,10 @@
 #include "Engine/Classes/Components/InstancedStaticMeshComponent.h"
 #include "GameInstanceOubliette.h"
 #include "OublietteCharacter.h"
+#include "DestructibleMesh.h"
+#include "ApexDestruction/Public/DestructibleComponent.h"
+#include "Engine/World.h"
+#include "CoreUObject/Public/Uobject/ConstructorHelpers.h"
 #include "LevelGenerator.generated.h"
 
 // Enum of different spawnable objects for rooms
@@ -38,10 +42,19 @@ struct FObjectDataStruct
 	}
 };
 
-struct RoomGenData
+struct FRoomGenDataStruct
 {
 	int32 roomType;
 	TArray<FObjectDataStruct> objects;
+
+	FRoomGenDataStruct() {};
+
+	//Constructor
+	FRoomGenDataStruct(int32 init_roomType, TArray<FObjectDataStruct> init_objects)
+	{
+		roomType = init_roomType;
+		objects = init_objects;
+	}
 };
 
 USTRUCT(BlueprintType)
@@ -113,9 +126,9 @@ private:
 	UClass* charBP;
 
 	//Room object stuff
-	TArray<RoomGenData> RoomSpawns_Standard;
+	TArray<FRoomGenDataStruct> RoomSpawns_Standard;
 	void GenerateObjects(AActor* targetRoom);
-	UStaticMesh* TableMesh;
+	UDestructibleMesh* TableDMesh;
 	UClass* BP_Chest;
 	UClass* BP_Slime;
 	UClass* BP_Slime_Fire;

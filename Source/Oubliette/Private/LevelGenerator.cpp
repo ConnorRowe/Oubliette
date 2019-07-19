@@ -2,13 +2,13 @@
 
 #include "LevelGenerator.h"
 #include "CoreMinimal.h"
-#include "Engine/World.h"
-#include "CoreUObject/Public/Uobject/ConstructorHelpers.h"
 
 // Sets default values
 ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	UWorld* const w = GetWorld();
+
 	// Create ISM component
 	WallMeshInstances = ObjectInitializer.CreateDefaultSubobject<UInstancedStaticMeshComponent>(this, TEXT("WallMeshInstances"));
 
@@ -16,22 +16,30 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 	RootComponent = WallMeshInstances;
 
 	// Room object generation stuff
-
+	// rooms are 3200^2 units in size
 	TArray<FObjectDataStruct> tempRoomData;
-	tempRoomData.Init(FObjectDataStruct(), 4);
-	tempRoomData[0] = FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, 300.0f, 0.0f), FRotator());
-	tempRoomData[1] = FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, -300.0f, 0.0f), FRotator());
-	tempRoomData[2] = FObjectDataStruct(EObjectTypeEnum::OTE_Table, FVector(600.0f, -600.0f, 0.0f), FRotator(0.0f, 180.0f, 0.0f));
-	tempRoomData[3] = FObjectDataStruct(EObjectTypeEnum::OTE_Chest, FVector(600.0f, 600.0f, 0.0f), FRotator(0.0f, 0.0f, 0.0f));
 
-	RoomSpawns_Standard.Init(RoomGenData(), 1);
-	RoomSpawns_Standard[0].roomType = 0;
-	RoomSpawns_Standard[0].objects = tempRoomData;
+	//two enemies, chest, table
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Ranged,	FVector(-600.0f, 300.0f, 0.0f),		FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, -300.0f, 0.0f),	FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,			FVector(600.0f, -600.0f, 0.0f),		FRotator(0.0f, 180.0f, 0.0f)));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest,			FVector(600.0f, 600.0f, 0.0f),		FRotator(0.0f, 0.0f, 0.0f)));
+	RoomSpawns_Standard.Add(FRoomGenDataStruct(0, tempRoomData));
+
+	tempRoomData.Empty();
+
+	//4 tables
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(600.0f, -600.0f, 0.0f),		FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(600.0f, 600.0f, 0.0f),		FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(-600.0f, -600.0f, 0.0f),	FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(-600.0f, 600.0f, 0.0f),		FRotator()));
+	RoomSpawns_Standard.Add(FRoomGenDataStruct(0, tempRoomData));
+
 
 	// Asset Loading
 	// Mesh loading
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> TableMeshObj(TEXT("/Game/Meshes/Static/SM_Table"));
-	TableMesh = TableMeshObj.Object;
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> TableDMeshObj(TEXT("/Game/Meshes/Static/Destructible/SM_Table_DM.SM_Table_DM"));
+	TableDMesh = Cast<UDestructibleMesh>(TableDMeshObj.Object);
 
 	//Blueprint loading
 	BP_Chest		= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/Items/BP_Chest.BP_Chest_C"));
@@ -42,6 +50,8 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 
 void ALevelGenerator::GenerateObjects(AActor* targetRoom)
 {
+	UWorld* const w = GetWorld();
+
 	int32 maxSize = RoomSpawns_Standard.Num() - 1;
 	int32 roomindex = FMath::RandRange(0, maxSize);
 
@@ -54,36 +64,38 @@ void ALevelGenerator::GenerateObjects(AActor* targetRoom)
 
 		case EObjectTypeEnum::OTE_Table:
 		{
-			UPROPERTY(EditAnywhere, Category = "Level Generation")
-			UStaticMeshComponent* TableComp = NewObject<UStaticMeshComponent>(targetRoom, FName("Table"));
+			UDestructibleComponent* TableComp = NewObject<UDestructibleComponent>(targetRoom, UDestructibleComponent::StaticClass(), FName("TableDestructibleMesh" + i));
 			TableComp->RegisterComponent();
-			TableComp->SetStaticMesh(TableMesh);
-			//TableComp->SetRelativeLocationAndRotation(RoomData[i].Location, RoomData[i].Rotation);
+			TableComp->SetDestructibleMesh(TableDMesh);
+			TableComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+			TableComp->SetSimulatePhysics(true);
+			TableComp->SetCanEverAffectNavigation(true);
 			TableComp->SetWorldLocationAndRotation((targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation);
-			//TableComp->AttachTo(targetRoom->RootComponent, NAME_None, EAttachLocation::KeepRelativeOffset);
+			TableComp->SetWorldScale3D(FVector(1.0f));
+
 			break;
 		}
 		case EObjectTypeEnum::OTE_Chest:
 		{
-			GetWorld()->SpawnActor<AActor>(BP_Chest, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+			w->SpawnActor<AActor>(BP_Chest, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
 
 			break;
 		}
 		case EObjectTypeEnum::OTE_Enemy_Standard:
 		{
-			GetWorld()->SpawnActor<AActor>(BP_Slime, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+			w->SpawnActor<AActor>(BP_Slime, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
 
 			break;
 		}
 		case EObjectTypeEnum::OTE_Enemy_Ranged:
 		{
-			GetWorld()->SpawnActor<AActor>(BP_Slime_Fire, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+			w->SpawnActor<AActor>(BP_Slime_Fire, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
 
 			break;
 		}
 		case EObjectTypeEnum::OTE_Enemy_Large:
 		{
-			GetWorld()->SpawnActor<AActor>(BP_Slime_Giant, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+			w->SpawnActor<AActor>(BP_Slime_Giant, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
 
 			break;
 		}
@@ -309,12 +321,14 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 //From the rooms generated from the generateLevels function, this spawns all the necessary objects into the world
 void ALevelGenerator::spawnLevel()
 {
+	UWorld* const w = GetWorld();
+
 	//Starting location for room
 	const float roomStart = roomSize + roomMargins;
 	//Reference to the game mode
-	AGameModeOubliette* gm = (AGameModeOubliette*)GetWorld()->GetAuthGameMode();
+	AGameModeOubliette* gm = (AGameModeOubliette*)w->GetAuthGameMode();
 	//Reference to the game instance
-	UGameInstanceOubliette* gi = (UGameInstanceOubliette*)GetWorld()->GetGameInstance();
+	UGameInstanceOubliette* gi = (UGameInstanceOubliette*)w->GetGameInstance();
 	FActorSpawnParameters spawnParams;
 
 	//Generate the room data
@@ -328,7 +342,7 @@ void ALevelGenerator::spawnLevel()
 		roomLoc.Z = 0.0f;
 
 		//Spawn the room actor and add it to the allRooms array in the game mode
-		AActor* newRoom = GetWorld()->SpawnActor<AActor>(roomBP, roomLoc, FRotator(0.0f), spawnParams);
+		AActor* newRoom = w->SpawnActor<AActor>(roomBP, roomLoc, FRotator(0.0f), spawnParams);
 		gm->allRooms.Emplace(newRoom);
 		GenerateObjects(newRoom);
 
@@ -336,8 +350,8 @@ void ALevelGenerator::spawnLevel()
 		if (i == 0)
 		{
 			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-			AOublietteCharacter* newChar = GetWorld()->SpawnActor<AOublietteCharacter>(charBP, roomLoc + FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
-			APlayerController* conRef = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+			AOublietteCharacter* newChar = w->SpawnActor<AOublietteCharacter>(charBP, roomLoc + FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
+			APlayerController* conRef = UGameplayStatics::GetPlayerController(w, 0);
 
 			conRef->GetPawn()->Destroy();
 
@@ -369,7 +383,7 @@ void ALevelGenerator::spawnLevel()
 			if (newWalls[i].wallType == 1)
 				spawnRegWall(wallLoc, (float)newWalls[i].zRot);
 			else if (newWalls[i].wallType == 2)
-				gm->allWallsDoors.Emplace(GetWorld()->SpawnActor<AActor>(wallDoorBP, wallLoc, FRotator(0.0f, (float)newWalls[i].zRot, 0.0f), spawnParams));
+				gm->allWallsDoors.Emplace(w->SpawnActor<AActor>(wallDoorBP, wallLoc, FRotator(0.0f, (float)newWalls[i].zRot, 0.0f), spawnParams));
 
 		}
 	}
