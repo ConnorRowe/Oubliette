@@ -19,18 +19,19 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 	// rooms are 3200^2 units in size
 	TArray<FObjectDataStruct> tempRoomData;
 
-	//two enemies, chest, table
+	/// Standard Rooms
+
+	//two enemies, 1 table
 	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Ranged,	FVector(-600.0f, 300.0f, 0.0f),		FRotator()));
 	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, -300.0f, 0.0f),	FRotator()));
 	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,			FVector(600.0f, -600.0f, 0.0f),		FRotator(0.0f, 180.0f, 0.0f)));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest,			FVector(600.0f, 600.0f, 0.0f),		FRotator(0.0f, 0.0f, 0.0f)));
 	RoomSpawns_Standard.Add(FRoomGenDataStruct(0, tempRoomData));
 
 	tempRoomData.Empty();
 
-	//4 tables
+	//3 tables, 1 chest
 	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(600.0f, -600.0f, 0.0f),		FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(600.0f, 600.0f, 0.0f),		FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest,	FVector(600.0f, 600.0f, 0.0f),		FRotator(0.0f)));
 	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(-600.0f, -600.0f, 0.0f),	FRotator()));
 	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(-600.0f, 600.0f, 0.0f),		FRotator()));
 	RoomSpawns_Standard.Add(FRoomGenDataStruct(0, tempRoomData));
@@ -42,10 +43,11 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 	TableDMesh = Cast<UDestructibleMesh>(TableDMeshObj.Object);
 
 	//Blueprint loading
-	BP_Chest		= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/Items/BP_Chest.BP_Chest_C"));
-	BP_Slime		= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/AI/Enemies/BP_Enemy_Slime.BP_Enemy_Slime_C"));
-	BP_Slime_Fire	= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire_C"));
-	BP_Slime_Giant	= FindObject<UClass>(ANY_PACKAGE, TEXT("/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant_C"));
+	BP_Slime = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime.BP_Enemy_Slime'"));
+	BP_Chest = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Items/BP_Chest.BP_Chest'"));
+	BP_Slime_Fire = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire'"));
+	BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
+
 }
 
 void ALevelGenerator::GenerateObjects(AActor* targetRoom)
@@ -56,6 +58,9 @@ void ALevelGenerator::GenerateObjects(AActor* targetRoom)
 	int32 roomindex = FMath::RandRange(0, maxSize);
 
 	TArray<FObjectDataStruct> RoomData = RoomSpawns_Standard[roomindex].objects;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	for (int i = 0; i < RoomData.Num(); ++i)
 	{
@@ -77,25 +82,25 @@ void ALevelGenerator::GenerateObjects(AActor* targetRoom)
 		}
 		case EObjectTypeEnum::OTE_Chest:
 		{
-			w->SpawnActor<AActor>(BP_Chest, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+			w->SpawnActor<AActor>(BP_Chest, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
 
 			break;
 		}
 		case EObjectTypeEnum::OTE_Enemy_Standard:
 		{
-			w->SpawnActor<AActor>(BP_Slime, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+			w->SpawnActor<AActor>(BP_Slime, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
 
 			break;
 		}
 		case EObjectTypeEnum::OTE_Enemy_Ranged:
 		{
-			w->SpawnActor<AActor>(BP_Slime_Fire, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+			w->SpawnActor<AActor>(BP_Slime_Fire, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
 
 			break;
 		}
 		case EObjectTypeEnum::OTE_Enemy_Large:
 		{
-			w->SpawnActor<AActor>(BP_Slime_Giant, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, FActorSpawnParameters());
+			w->SpawnActor<AActor>(BP_Slime_Giant, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
 
 			break;
 		}
@@ -344,7 +349,6 @@ void ALevelGenerator::spawnLevel()
 		//Spawn the room actor and add it to the allRooms array in the game mode
 		AActor* newRoom = w->SpawnActor<AActor>(roomBP, roomLoc, FRotator(0.0f), spawnParams);
 		gm->allRooms.Emplace(newRoom);
-		GenerateObjects(newRoom);
 
 		//If it is the first room, spawn the character, possess it, and set reference in the game instance
 		if (i == 0)
@@ -357,6 +361,11 @@ void ALevelGenerator::spawnLevel()
 
 			conRef->Possess(newChar);
 			gi->charRef = newChar;
+		}
+		else
+		{
+			//Only generate stuff if it is not the first room
+			GenerateObjects(newRoom);
 		}
 	}
 

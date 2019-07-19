@@ -337,3 +337,12 @@ struct FLineageSaveStruct
 };
 
 #pragma endregion STRUCTS
+
+// Load Blueprint Class Asset From Path
+static FORCEINLINE UClass* LoadBPFromPath(FString Path)
+{
+	UObject* loadObj = StaticLoadObject(UObject::StaticClass(), nullptr, *Path);
+	UBlueprint* bpObj = Cast<UBlueprint>(loadObj);
+
+	return Cast<UClass>(bpObj->GeneratedClass);
+}
