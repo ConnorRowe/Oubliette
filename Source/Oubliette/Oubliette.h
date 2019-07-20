@@ -342,7 +342,8 @@ struct FLineageSaveStruct
 static FORCEINLINE UClass* LoadBPFromPath(FString Path)
 {
 	UObject* loadObj = StaticLoadObject(UObject::StaticClass(), nullptr, *Path);
+
 	UBlueprint* bpObj = Cast<UBlueprint>(loadObj);
 
-	return Cast<UClass>(bpObj->GeneratedClass);
+	return CastChecked<UClass>(bpObj->GeneratedClass);
 }

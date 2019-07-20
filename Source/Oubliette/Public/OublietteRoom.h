@@ -14,4 +14,8 @@ class OUBLIETTE_API AOublietteRoom : public AActor
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+public:
+	UPROPERTY(EditAnywhere, Category = "Level Generation")
+	int32 roomType;
 };

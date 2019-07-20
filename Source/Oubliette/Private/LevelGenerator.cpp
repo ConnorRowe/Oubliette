@@ -21,43 +21,81 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 
 	/// Standard Rooms
 
-	//two enemies, 1 table
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Ranged,	FVector(-600.0f, 300.0f, 0.0f),		FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, -300.0f, 0.0f),	FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,			FVector(600.0f, -600.0f, 0.0f),		FRotator(0.0f, 180.0f, 0.0f)));
-	RoomSpawns_Standard.Add(FRoomGenDataStruct(0, tempRoomData));
-
+	// two enemies, 1 table
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Ranged, FVector(-600.0f, 300.0f, 0.0f), FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, -300.0f, 0.0f), FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table, FVector(600.0f, -600.0f, 0.0f), FRotator(0.0f, 180.0f, 0.0f)));
+	RoomSpawns_Standard.Add(FRoomGenDataStruct(1, tempRoomData));
 	tempRoomData.Empty();
 
-	//3 tables, 1 chest
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(600.0f, -600.0f, 0.0f),		FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest,	FVector(600.0f, 600.0f, 0.0f),		FRotator(0.0f)));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(-600.0f, -600.0f, 0.0f),	FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table,	FVector(-600.0f, 600.0f, 0.0f),		FRotator()));
-	RoomSpawns_Standard.Add(FRoomGenDataStruct(0, tempRoomData));
+	// 2 tables
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table, FVector(600.0f, -600.0f, 0.0f), FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table, FVector(-600.0f, 600.0f, 0.0f), FRotator()));
+	RoomSpawns_Standard.Add(FRoomGenDataStruct(1, tempRoomData));
+	tempRoomData.Empty();
 
+	/// Treasure Rooms
 
-	// Asset Loading
+	// single middle chest
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest, FVector(0.0f), FRotator()));
+	RoomSpawns_Treasure.Add(FRoomGenDataStruct(2, tempRoomData));
+	tempRoomData.Empty();
+
+	// double chest
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest, FVector(0.0f, 400.0f, 0.0f), FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest, FVector(0.0f, -400.0f, 0.0f), FRotator()));
+	RoomSpawns_Treasure.Add(FRoomGenDataStruct(2, tempRoomData));
+	tempRoomData.Empty();
+
+	/// Boss Rooms
+
+	// giant slime
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Large, FVector(0.0f), FRotator()));
+	RoomSpawns_Boss.Add(FRoomGenDataStruct(3, tempRoomData));
+	tempRoomData.Empty();
+
+	/// Asset Loading
 	// Mesh loading
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> TableDMeshObj(TEXT("/Game/Meshes/Static/Destructible/SM_Table_DM.SM_Table_DM"));
 	TableDMesh = Cast<UDestructibleMesh>(TableDMeshObj.Object);
 
-	//Blueprint loading
-	BP_Slime = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime.BP_Enemy_Slime'"));
-	BP_Chest = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Items/BP_Chest.BP_Chest'"));
-	BP_Slime_Fire = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire'"));
-	BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
-
+	//Prevents unhandled exception crash (probably from UE-71147)
+	if (GetWorld())
+	{
+		BP_Slime = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime.BP_Enemy_Slime'"));
+		BP_Chest = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Items/BP_Chest.BP_Chest'"));
+		BP_Slime_Fire = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire'"));
+		BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
+	}
 }
 
-void ALevelGenerator::GenerateObjects(AActor* targetRoom)
+void ALevelGenerator::GenerateObjects(AOublietteRoom* targetRoom)
 {
 	UWorld* const w = GetWorld();
+	TArray<FRoomGenDataStruct> RoomSpawns;
 
-	int32 maxSize = RoomSpawns_Standard.Num() - 1;
+	switch (targetRoom->roomType)
+	{
+	case 1:
+		// Standard room
+		RoomSpawns = RoomSpawns_Standard;
+		break;
+	case 2:
+		// Treasure room
+		RoomSpawns = RoomSpawns_Treasure;
+		break;
+	case 3:
+		// Boss room
+		RoomSpawns = RoomSpawns_Boss;
+		break;
+	default:
+		break;
+	}
+
+	int32 maxSize = RoomSpawns.Num() - 1;
 	int32 roomindex = FMath::RandRange(0, maxSize);
+	TArray<FObjectDataStruct> RoomData = RoomSpawns[roomindex].objects;
 
-	TArray<FObjectDataStruct> RoomData = RoomSpawns_Standard[roomindex].objects;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -134,6 +172,22 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 {
 	roomData.Empty();
 
+	int32 treasureRooms = FMath::RandRange(1, 2);
+	int32 bossRooms = 1;
+
+	TArray<int32> requiredRooms;
+
+	//Add treasure rooms
+	for (int i = 0; i < treasureRooms; ++i)
+	{
+		requiredRooms.Add(2);
+	}
+	//Add boss rooms
+	for (int i = 0; i < bossRooms; ++i)
+	{
+		requiredRooms.Add(3);
+	}
+
 	//Parse array, setting all room IDs to 0 (empty)
 	for (int x = 0; x < xSize; ++x)
 	{
@@ -144,9 +198,10 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 	}
 
 	//Pick random starting point in array
-	int xPos = rand() % xSize;
-	int yPos = rand() % ySize;
+	int xPos = FMath::RandRange(0, xSize);
+	int yPos = FMath::RandRange(0, ySize);
 
+	//Directions
 	int xD, yD = 0;
 
 	int tries = 0;
@@ -160,7 +215,7 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 		{
 			++tries;
 			//Picking a new position for next room
-			int newDir = rand() % 4;
+			int newDir = FMath::RandRange(0,3);
 			switch (newDir)
 			{
 			case 0:
@@ -185,13 +240,15 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 			if (roomIDs[xPos + xD][yPos + yD] == 0 && (xPos + xD) < xSize && (yPos + yD) < ySize && (xPos + xD) >= 0 && (yPos + yD) >= 0)
 			{
 				xPos += xD; yPos += yD;
-				//setting new ID
+
+				//Set room ID
 				roomIDs[xPos][yPos] = 1;
+
 				roomOK = true;
 				tries = 0;
 			}
 
-			if (tries > 100)
+			if (tries > 1000)
 			{
 				//AKA somethings wrong and should probably skip to avoid crash
 				roomOK = true;
@@ -202,17 +259,40 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 
 	//Parse the roomIDs array one final time and convert to a TArray that blueprints understand then return it
 	FRoomData tempData;
+	int r = 0;
 	for (int x = 0; x < xSize; ++x)
 	{
 		for (int y = 0; y < ySize; ++y)
 		{
 			if (roomIDs[x][y] == 1)
 			{
-				tempData.roomType = 1;
+				//Don't let the first room be special - Sorry, first room!
+				if (r > 0)
+				{
+					//Make sure that there are enough rooms left for normal rooms to be generated
+					if (numRooms - r < (requiredRooms.Num() - 1))
+					{
+						tempData.roomType = requiredRooms.Pop(true);
+					}// Just make a room special randomly sometimes to spread them out through the level instead of leaving until last;
+					else if (FMath::RandBool() && (requiredRooms.Num() > 0))
+					{
+						tempData.roomType = requiredRooms.Pop(true);
+					}// Otherwise make it a normal room
+					else
+					{
+						tempData.roomType = 1;
+					}
+				}
+				else
+				{
+					tempData.roomType = 1;
+				}
+
 				tempData.xPos = x;
 				tempData.yPos = y;
 
 				roomData.Emplace(tempData);
+				++r;
 			}
 		}
 	}
@@ -232,7 +312,7 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 		for (int y = 0; y < ySize; ++y)
 		{
 			//If room exists
-			if (roomIDs[x][y] == 1)
+			if (roomIDs[x][y] > 0)
 			{
 				//Room is completely left / right
 				if (x == 0 || x == xSize)
@@ -347,8 +427,9 @@ void ALevelGenerator::spawnLevel()
 		roomLoc.Z = 0.0f;
 
 		//Spawn the room actor and add it to the allRooms array in the game mode
-		AActor* newRoom = w->SpawnActor<AActor>(roomBP, roomLoc, FRotator(0.0f), spawnParams);
+		AOublietteRoom* newRoom = w->SpawnActor<AOublietteRoom>(roomBP, roomLoc, FRotator(0.0f), spawnParams);
 		gm->allRooms.Emplace(newRoom);
+		newRoom->roomType = rooms[i].roomType;
 
 		//If it is the first room, spawn the character, possess it, and set reference in the game instance
 		if (i == 0)

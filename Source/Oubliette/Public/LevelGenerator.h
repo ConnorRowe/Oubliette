@@ -9,6 +9,7 @@
 #include "Engine/Classes/Components/InstancedStaticMeshComponent.h"
 #include "GameInstanceOubliette.h"
 #include "OublietteCharacter.h"
+#include "OublietteRoom.h"
 #include "DestructibleMesh.h"
 #include "ApexDestruction/Public/DestructibleComponent.h"
 #include "Engine/World.h"
@@ -127,7 +128,9 @@ private:
 
 	//Room object stuff
 	TArray<FRoomGenDataStruct> RoomSpawns_Standard;
-	void GenerateObjects(AActor* targetRoom);
+	TArray<FRoomGenDataStruct> RoomSpawns_Treasure;
+	TArray<FRoomGenDataStruct> RoomSpawns_Boss;
+	void GenerateObjects(AOublietteRoom* targetRoom);
 	UDestructibleMesh* TableDMesh;
 	UClass* BP_Chest;
 	UClass* BP_Slime;
