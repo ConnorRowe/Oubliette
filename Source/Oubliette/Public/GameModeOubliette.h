@@ -31,6 +31,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
 	FItemPoolStruct ItemPool_GeneralChest;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
+	TArray<FItemStruct> ItemPool_Starter;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
 	TArray<FItemAffixStruct> ItemPrefixes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
 	TArray<FItemAffixStruct> ItemSuffixes;
