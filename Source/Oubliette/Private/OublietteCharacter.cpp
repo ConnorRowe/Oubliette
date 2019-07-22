@@ -54,8 +54,8 @@ FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneCompon
 	ignoredActors.Append(gm->allRooms);
 
 	//setup trace parameters
-	RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), true, this);
-	RV_TraceParams.bTraceComplex = true;
+	RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), false, this);
+	RV_TraceParams.bTraceComplex = false;
 	RV_TraceParams.bReturnPhysicalMaterial = false;
 
 	//Re-initialize hit info
@@ -66,7 +66,7 @@ FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneCompon
 		RV_Hit,			//result
 		tStart,			//start
 		tEnd,			//end
-		ECC_Pawn,		//collision channel
+		ECC_Visibility,	//collision channel
 		RV_TraceParams
 	);
 
