@@ -56,6 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character | Utility")
 	FLineTraceData tryLineTrace(float traceLength, USceneComponent* startComp);
 
+	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
+	void calculateStats();
+
 	//Gameplay variables
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
 	int32 HealthCurrent;
@@ -93,4 +96,46 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Inventory")
 	TArray<FItemStruct> Inventory;
 
+	//Base Stats
+	int32 baseInte = 1;
+	int32 baseAgil = 1;
+	int32 baseWisd = 1;
+	int32 baseBonFire = 0;
+	int32 baseBonFrost = 0;
+	int32 baseBonShock = 0;
+	int32 baseBonArcane = 0;
+	int32 baseBonShadow = 0;
+	int32 baseBonUndead = 0;
+	int32 baseBonSlime = 0;
+	int32 baseBonBeast = 0;
+	int32 baseBonXP = 0;
+	int32 baseBonLoot = 0;
+
+	//Actual Working Stats
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 Inte;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 Agil;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 Wisd;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonFire;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonFrost;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonShock;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonArcane;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonShadow;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonUndead;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonSlime;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonBeast;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonXP;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonLoot;
 };

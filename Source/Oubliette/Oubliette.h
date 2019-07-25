@@ -61,7 +61,7 @@ enum class EStatsEnum : uint8
 	ESA_BetterLoot	UMETA(DisplayName = "% Better Chance of Finding Magical Items"),
 	ESA_DmgUndead	UMETA(DisplayName = "% Bonus Damage against Undead"),
 	ESA_DmgSlime	UMETA(DisplayName = "% Bonus Damage against Slimes"),
-	ESA_DmgCreatures UMETA(DisplayName = "% Bonus Damage against Creatures")
+	ESA_DmgBeasts	UMETA(DisplayName = "% Bonus Damage against Beasts")
 };
 
 UENUM(BlueprintType)

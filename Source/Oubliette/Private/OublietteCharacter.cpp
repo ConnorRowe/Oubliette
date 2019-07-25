@@ -81,3 +81,74 @@ FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneCompon
 	
 	return tData;
 }
+
+void AOublietteCharacter::calculateStats()
+{
+	//Reset stats
+	Inte = baseInte;
+	Agil = baseAgil;
+	Wisd = baseWisd;
+	BonFire = baseBonFire;
+	BonFrost = baseBonFire;
+	BonShock = baseBonShock;
+	BonArcane = baseBonArcane;
+	BonShadow = baseBonShadow;
+	BonUndead = baseBonUndead;
+	BonSlime = baseBonSlime;
+	BonBeast = baseBonBeast;
+	BonXP = baseBonXP;
+	BonLoot = baseBonLoot;
+
+	//Parse items to find stats
+	for (auto& Item : Inventory)
+	{
+		for (auto& Stat : Item.Stats)
+		{
+			switch (Stat.StatType)
+			{
+			case EStatsEnum::ESA_Agility:
+				Agil += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_BetterLoot:
+				BonLoot += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_BonusArcane:
+				BonArcane += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_BonusFire:
+				BonFire += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_BonusFrost:
+				BonFrost += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_BonusShadow:
+				BonShadow += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_BonusShock:
+				BonShock += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_BonusXP:
+				BonXP += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_DmgUndead:
+				BonUndead += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_DmgBeasts:
+				BonBeast += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_DmgSlime:
+				BonSlime += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_Intellect:
+				Inte += Stat.StatAmount;
+				break;
+			case EStatsEnum::ESA_Wisdom:
+				Wisd += Stat.StatAmount;
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
+}
