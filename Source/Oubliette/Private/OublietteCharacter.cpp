@@ -10,7 +10,11 @@ AOublietteCharacter::AOublietteCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	TeamId = FGenericTeamId(0);
-
+	
+	if (GetWorld())
+	{
+		gm = (AGameModeOubliette*)GetWorld()->GetAuthGameMode();
+	}
 }
 
 // Called when the game starts or when spawned
@@ -151,4 +155,83 @@ void AOublietteCharacter::calculateStats()
 			}
 		}
 	}
+}
+
+void AOublietteCharacter::calcBaseDamage()
+{
+
+	float elementalBonus;
+	float baseDamage;
+	int spellID;
+
+	// Find the correct elemental damage bonus multiplier
+	switch (ActiveSpellRNew.SpellElement)
+	{
+	case ESpellElemsEnum::SEE_Arcane:
+		elementalBonus = BonArcane;
+		spellID = 3;
+		break;
+
+	case ESpellElemsEnum::SEE_Fire:
+		elementalBonus = BonFire;
+		spellID = 0;
+		break;
+
+	case ESpellElemsEnum::SEE_Frost:
+		elementalBonus = BonFrost;
+		spellID = 1;
+		break;
+
+	case ESpellElemsEnum::SEE_Shadow:
+		elementalBonus = BonShadow;
+		spellID = 4;
+		break;
+
+	case ESpellElemsEnum::SEE_Shock:
+		elementalBonus = BonShock;
+		spellID = 2;
+		break;
+	
+	default:
+		break;
+	}
+
+	// Find the correct base damage
+	switch (ActiveSpellRNew.SpellFormation)
+	{
+	case ESpellFormsEnum::SFE_Channel:
+		baseDamage = gm->Spells_Channel[spellID].BaseDamagePerSec;
+		break;
+
+	case ESpellFormsEnum::SFE_HitScan:
+		baseDamage = gm->Spells_HitScan[spellID].BaseDamage;
+		break;
+
+	case ESpellFormsEnum::SFE_Projectile:
+		baseDamage = gm->Spells_Projectile[spellID].BaseDamage;
+		break;
+
+	default:
+		break;
+	}
+
+	BaseSpellDamage = baseDamage * (1 + Inte / 10) * (1 + elementalBonus);
+}
+
+FSpellDamageCalc AOublietteCharacter::calcSpellDamage()
+{
+	FSpellDamageCalc spellDmg;
+	
+	float critChance = 0.02f + (Wisd / 150.0f);
+
+	spellDmg.Damage = FMath::RandRange(BaseSpellDamage*0.8f, BaseSpellDamage*1.2f);
+
+
+	if (FMath::FRand() < critChance)
+	{
+		spellDmg.Damage = spellDmg.Damage * 2;
+		spellDmg.isCrit = true;
+	}
+
+	return spellDmg;
 }

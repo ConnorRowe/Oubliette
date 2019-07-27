@@ -4,9 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Oubliette.h"
+#include "MyDamageType_Arcane.h"
+#include "MyDamageType_Fire.h"
+#include "MyDamageType_Frost.h"
+#include "MyDamageType_Shadow.h"
+#include "MyDamageType_Shock.h"
 #include "GameModeOubliette.h"
 #include "CollisionQueryParams.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/DamageType.h"
 #include "GenericTeamAgentInterface.h"
 #include "OublietteCharacter.generated.h"
 
@@ -29,6 +35,18 @@ struct FLineTraceData
 	float Distance;
 };
 
+USTRUCT(BlueprintType)
+struct FSpellDamageCalc
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "Character | Spells")
+	float Damage;
+	UPROPERTY(BlueprintReadOnly, Category = "Character | Spells")
+	bool isCrit = false;
+};
+
+
 UCLASS()
 class OUBLIETTE_API AOublietteCharacter : public ACharacter, public IGenericTeamAgentInterface
 {
@@ -41,6 +59,8 @@ public:
 private:
 	FGenericTeamId TeamId;
 	virtual FGenericTeamId GetGenericTeamId() const override;
+	AGameModeOubliette* gm;
+	float BaseSpellDamage;
 
 protected:
 	// Called when the game starts or when spawned
@@ -58,6 +78,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
 	void calculateStats();
+
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+	void calcBaseDamage();
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+	FSpellDamageCalc calcSpellDamage();
+
 
 	//Gameplay variables
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
