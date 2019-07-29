@@ -7,8 +7,6 @@
 ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	UWorld* const w = GetWorld();
-
 	// Create ISM component
 	WallMeshInstances = ObjectInitializer.CreateDefaultSubobject<UInstancedStaticMeshComponent>(this, TEXT("WallMeshInstances"));
 
@@ -68,12 +66,12 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 		BP_Slime_Fire = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire'"));
 		BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
 		BP_Trapdoor = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Trapdoor.BP_Trapdoor'"));
+		charBP = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Character/BP_Oubliette_Character.BP_Oubliette_Character'"));
 	}
 }
 
 void ALevelGenerator::GenerateObjects(AOublietteRoom* targetRoom)
 {
-	UWorld* const w = GetWorld();
 	TArray<FRoomGenDataStruct> RoomSpawns;
 
 	switch (targetRoom->roomType)
@@ -159,9 +157,31 @@ void ALevelGenerator::GenerateObjects(AOublietteRoom* targetRoom)
 // Called when the game starts or when spawned
 void ALevelGenerator::BeginPlay()
 {
-	Super::BeginPlay();
+	//Reference to world
+	w = GetWorld();
+	//Reference to the game mode
+	gm = (AGameModeOubliette*)w->GetAuthGameMode();
+	//Reference to the game instance
+	gi = (UGameInstanceOubliette*)w->GetGameInstance();
+	//Reference to player controller
+	conRef = UGameplayStatics::GetPlayerController(w, 0);
+
+	FActorSpawnParameters spawnParams;
+	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 	WallMeshInstances->SetStaticMesh(wallMesh);
+
+	//Spawn character in world
+	charRef = w->SpawnActor<AOublietteCharacter>(charBP, FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
+
+	//Destroy old pawn
+	conRef->GetPawn()->Destroy();
+	//Possess new pawn
+	conRef->Possess(charRef);
+	//Set character reference in game instance
+	gi->charRef = charRef;
+
+	Super::BeginPlay();
 
 }
 
@@ -414,14 +434,8 @@ TArray<FWallData> ALevelGenerator::generateWalls()
 //From the rooms generated from the generateLevels function, this spawns all the necessary objects into the world
 void ALevelGenerator::spawnLevel()
 {
-	UWorld* const w = GetWorld();
-
 	//Starting location for room
 	const float roomStart = roomSize + roomMargins;
-	//Reference to the game mode
-	AGameModeOubliette* gm = (AGameModeOubliette*)w->GetAuthGameMode();
-	//Reference to the game instance
-	UGameInstanceOubliette* gi = (UGameInstanceOubliette*)w->GetGameInstance();
 	FActorSpawnParameters spawnParams;
 
 	//Generate the room data
@@ -442,14 +456,8 @@ void ALevelGenerator::spawnLevel()
 		//If it is the first room, spawn the character, possess it, and set reference in the game instance
 		if (i == 0)
 		{
-			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-			AOublietteCharacter* newChar = w->SpawnActor<AOublietteCharacter>(charBP, roomLoc + FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
-			APlayerController* conRef = UGameplayStatics::GetPlayerController(w, 0);
-
-			conRef->GetPawn()->Destroy();
-
-			conRef->Possess(newChar);
-			gi->charRef = newChar;
+			//Set character's position to the room
+			charRef->SetActorLocation(roomLoc + FVector(0.0f, 0.0f, 100.0f));
 		}
 		else
 		{
@@ -487,6 +495,39 @@ void ALevelGenerator::spawnLevel()
 	}
 }
 
+void ALevelGenerator::nextLevel()
+{
+	//Destroy all the level objects
+	for (auto& WallDoor : gm->allWallsDoors)
+	{
+		w->DestroyActor(WallDoor);
+	}
+	for (TActorIterator<AOublietteRoom> RoomItr(w); RoomItr; ++RoomItr)
+	{
+		w->DestroyActor(*RoomItr);
+	}
+	for (TActorIterator<AOublietteItem> ItemItr(w); ItemItr; ++ItemItr)
+	{
+		w->DestroyActor(*ItemItr);
+	}
+	for (TActorIterator<AEnemyOubliette> EnemyItr(w); EnemyItr; ++EnemyItr)
+	{
+		w->DestroyActor(*EnemyItr);
+	}
+	for (TActorIterator<AOublietteChest> ChestItr(w); ChestItr; ++ChestItr)
+	{
+		w->DestroyActor(*ChestItr);
+	}
+	for (TActorIterator<AOublietteTrapdoor> TrapDItr(w); TrapDItr; ++TrapDItr)
+	{
+		w->DestroyActor(*TrapDItr);
+	}
+	WallMeshInstances->ClearInstances();
+
+	//Spawn new level
+	spawnLevel();
+}
+
 //Sets all the variables needed to generate and spawn a level
 void ALevelGenerator::setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallBP, UClass* WallDoorBP, UClass* CharBP)
 {
@@ -516,6 +557,6 @@ void ALevelGenerator::setGenInfo(const int32 XSize, const int32 YSize, const int
 	roomBP = RoomBP;
 	wallBP = WallBP;
 	wallDoorBP = WallDoorBP;
-	charBP = CharBP;
+	//charBP = CharBP;
 }
 

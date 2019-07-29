@@ -10,10 +10,15 @@
 #include "GameInstanceOubliette.h"
 #include "OublietteCharacter.h"
 #include "OublietteRoom.h"
+#include "OublietteItem.h"
+#include "OublietteChest.h"
+#include "OublietteTrapdoor.h"
+#include "EnemyOubliette.h"
 #include "DestructibleMesh.h"
 #include "ApexDestruction/Public/DestructibleComponent.h"
 #include "Engine/World.h"
 #include "CoreUObject/Public/Uobject/ConstructorHelpers.h"
+#include "EngineUtils.h"
 #include "LevelGenerator.generated.h"
 
 // Enum of different spawnable objects for rooms
@@ -106,6 +111,8 @@ public:
 	TArray<FWallData> generateWalls();
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
 	void spawnLevel();
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void nextLevel();
 
 	UPROPERTY(BlueprintReadOnly, Category = "Level Generation")
 	TArray<FRoomData> roomData;
@@ -115,7 +122,15 @@ public:
 
 	void spawnRegWall(const FVector Location, const float ZRot);
 
+	AOublietteCharacter* charRef;
+
+
 private:
+	UWorld* w;
+	AGameModeOubliette* gm;
+	UGameInstanceOubliette* gi;
+	APlayerController* conRef;
+
 	int32 roomIDs[50][50];
 	int32 xSize;
 	int32 ySize;
