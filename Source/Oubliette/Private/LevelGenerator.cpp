@@ -51,6 +51,7 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 
 	// giant slime
 	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Large, FVector(0.0f), FRotator()));
+	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Trapdoor, FVector(0.0f), FRotator()));
 	RoomSpawns_Boss.Add(FRoomGenDataStruct(3, tempRoomData));
 	tempRoomData.Empty();
 
@@ -66,6 +67,7 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 		BP_Chest = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Items/BP_Chest.BP_Chest'"));
 		BP_Slime_Fire = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire'"));
 		BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
+		BP_Trapdoor = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Trapdoor.BP_Trapdoor'"));
 	}
 }
 
@@ -139,6 +141,12 @@ void ALevelGenerator::GenerateObjects(AOublietteRoom* targetRoom)
 		case EObjectTypeEnum::OTE_Enemy_Large:
 		{
 			w->SpawnActor<AActor>(BP_Slime_Giant, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
+
+			break;
+		}
+		case EObjectTypeEnum::OTE_Trapdoor:
+		{
+			w->SpawnActor<AActor>(BP_Trapdoor, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
 
 			break;
 		}

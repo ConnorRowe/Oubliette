@@ -23,7 +23,8 @@ enum class EObjectTypeEnum : uint8
 	OTE_Enemy_Standard,
 	OTE_Enemy_Ranged,
 	OTE_Enemy_Large,
-	OTE_Chest
+	OTE_Chest,
+	OTE_Trapdoor
 };
 
 struct FObjectDataStruct
@@ -136,5 +137,6 @@ private:
 	UClass* BP_Slime;
 	UClass* BP_Slime_Fire;
 	UClass* BP_Slime_Giant;
+	UClass* BP_Trapdoor;
 
 };
