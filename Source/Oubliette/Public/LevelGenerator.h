@@ -12,6 +12,7 @@
 #include "OublietteRoom.h"
 #include "OublietteItem.h"
 #include "OublietteChest.h"
+#include "OublietteDoor.h"
 #include "OublietteTrapdoor.h"
 #include "EnemyOubliette.h"
 #include "DestructibleMesh.h"
@@ -70,9 +71,9 @@ struct FRoomData
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(BlueprintReadWrite, Category = "Room Data")
-	int32 xPos;
+	int32 xPos = NULL;
 	UPROPERTY(BlueprintReadWrite, Category = "Room Data")
-	int32 yPos;
+	int32 yPos = NULL;
 	UPROPERTY(BlueprintReadWrite, Category = "Room Data")
 	int32 roomType = 0;
 };
@@ -106,7 +107,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallBP, UClass* WallDoorBP, UClass* CharBP);
+	void setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallDoorBP);
 	TArray<FRoomData> generateRooms();
 	TArray<FWallData> generateWalls();
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
@@ -138,9 +139,8 @@ private:
 	int32 roomSize;
 	int32 roomMargins;
 	UClass* roomBP;
-	UClass* wallBP;
 	UClass* wallDoorBP;
-	UClass* charBP;
+	UClass* BP_Char;
 
 	//Room object stuff
 	TArray<FRoomGenDataStruct> RoomSpawns_Standard;

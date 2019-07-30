@@ -66,7 +66,7 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 		BP_Slime_Fire = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire'"));
 		BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
 		BP_Trapdoor = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Trapdoor.BP_Trapdoor'"));
-		charBP = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Character/BP_Oubliette_Character.BP_Oubliette_Character'"));
+		BP_Char = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Character/BP_Oubliette_Character.BP_Oubliette_Character'"));
 	}
 }
 
@@ -172,7 +172,7 @@ void ALevelGenerator::BeginPlay()
 	WallMeshInstances->SetStaticMesh(wallMesh);
 
 	//Spawn character in world
-	charRef = w->SpawnActor<AOublietteCharacter>(charBP, FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
+	charRef = w->SpawnActor<AOublietteCharacter>(BP_Char, FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
 
 	//Destroy old pawn
 	conRef->GetPawn()->Destroy();
@@ -198,8 +198,9 @@ void ALevelGenerator::spawnRegWall(const FVector Location, const float ZRot)
 
 TArray<FRoomData> ALevelGenerator::generateRooms()
 {
-	roomData.Empty();
-
+	int32 seed = (int32)(FDateTime::Now().GetTicks() % INT_MAX);
+	FMath::RandInit(seed);
+	
 	int32 treasureRooms = FMath::RandRange(1, 2);
 	int32 bossRooms = 1;
 
@@ -216,111 +217,120 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 		requiredRooms.Add(3);
 	}
 
-	//Parse array, setting all room IDs to 0 (empty)
-	for (int x = 0; x < xSize; ++x)
+	roomData.Empty();
+
+	//Prevent empty level bug
+	while (roomData.Num() < numRooms)
 	{
-		for (int y = 0; y < ySize; ++y)
+		roomData.Empty();
+
+		//Parse array, setting all room IDs to 0 (empty)
+		for (int x = 0; x < 49; ++x)
 		{
-			roomIDs[x][y] = 0;
-		}
-	}
-
-	//Pick random starting point in array
-	int xPos = FMath::RandRange(0, xSize);
-	int yPos = FMath::RandRange(0, ySize);
-
-	//Directions
-	int xD, yD = 0;
-
-	int tries = 0;
-
-	for (int r = 1; r < numRooms; ++r)
-	{
-		bool roomOK = false;
-		roomIDs[xPos][yPos] = 1;
-
-		while (!roomOK)
-		{
-			++tries;
-			//Picking a new position for next room
-			int newDir = FMath::RandRange(0,3);
-			switch (newDir)
+			for (int y = 0; y < 49; ++y)
 			{
-			case 0:
-				xD = 1; yD = 0;
-				break;
-			case 1:
-				xD = 0; yD = 1;
-				break;
-			case 2:
-				xD = -1; yD = 0;
-				break;
-			case 3:
-				xD = 0; yD = -1;
-				break;
-			default:
-				xD = 0; yD = 0;
-				break;
-			}
-
-			//Room space exists and is empty
-			//if (roomIDs[xPos + xD][yPos + yD] != NULL && roomIDs[xPos + xD][yPos + yD] == 0)
-			if (roomIDs[xPos + xD][yPos + yD] == 0 && (xPos + xD) < xSize && (yPos + yD) < ySize && (xPos + xD) >= 0 && (yPos + yD) >= 0)
-			{
-				xPos += xD; yPos += yD;
-
-				//Set room ID
-				roomIDs[xPos][yPos] = 1;
-
-				roomOK = true;
-				tries = 0;
-			}
-
-			if (tries > 1000)
-			{
-				//AKA somethings wrong and should probably skip to avoid crash
-				roomOK = true;
-				tries = 0;
+				roomIDs[x][y] = 0;
 			}
 		}
-	}
 
-	//Parse the roomIDs array one final time and convert to a TArray that blueprints understand then return it
-	FRoomData tempData;
-	int r = 0;
-	for (int x = 0; x < xSize; ++x)
-	{
-		for (int y = 0; y < ySize; ++y)
+		//Pick random starting point in array
+		int xPos = FMath::RandRange(0, xSize);
+		int yPos = FMath::RandRange(0, ySize);
+
+		//Directions
+		int xD, yD = 0;
+
+		int tries = 0;
+
+		for (int r = 1; r < numRooms; ++r)
 		{
-			if (roomIDs[x][y] == 1)
+			bool roomOK = false;
+			roomIDs[xPos][yPos] = 1;
+
+			while (!roomOK)
 			{
-				//Don't let the first room be special - Sorry, first room!
-				if (r > 0)
+				++tries;
+				//Picking a new position for next room
+				int newDir = FMath::RandRange(0, 3);
+				switch (newDir)
 				{
-					//Make sure that there are enough rooms left for normal rooms to be generated
-					if (numRooms - r < (requiredRooms.Num() - 1))
+				case 0:
+					xD = 1; yD = 0;
+					break;
+				case 1:
+					xD = 0; yD = 1;
+					break;
+				case 2:
+					xD = -1; yD = 0;
+					break;
+				case 3:
+					xD = 0; yD = -1;
+					break;
+				default:
+					xD = 0; yD = 0;
+					break;
+				}
+
+				//Room space exists and is empty
+				//if (roomIDs[xPos + xD][yPos + yD] != NULL && roomIDs[xPos + xD][yPos + yD] == 0)
+				if (roomIDs[xPos + xD][yPos + yD] == 0 && (xPos + xD) < xSize && (yPos + yD) < ySize && (xPos + xD) >= 0 && (yPos + yD) >= 0)
+				{
+					xPos += xD; yPos += yD;
+
+					//Set room ID
+					roomIDs[xPos][yPos] = 1;
+
+					roomOK = true;
+					tries = 0;
+				}
+
+				if (tries > 1000)
+				{
+					//AKA somethings wrong and should probably skip to avoid crash
+					roomOK = true;
+					tries = 0;
+				}
+			}
+		}
+
+		//Parse the roomIDs array one final time and convert to a TArray that blueprints understand then return it
+		FRoomData tempData;
+		int r = 0;
+
+		for (int xR = 0; xR < xSize; ++xR)
+		{
+			for (int yR = 0; yR < ySize; ++yR)
+			{
+				if (roomIDs[xR][yR] == 1)
+				{
+					//Don't let the first room be special - Sorry, first room!
+					if (r > 0)
 					{
-						tempData.roomType = requiredRooms.Pop(true);
-					}// Just make a room special randomly sometimes to spread them out through the level instead of leaving until last;
-					else if (FMath::RandBool() && (requiredRooms.Num() > 0))
-					{
-						tempData.roomType = requiredRooms.Pop(true);
-					}// Otherwise make it a normal room
+						//Make sure that there are enough rooms left for normal rooms to be generated
+						if (numRooms - r < (requiredRooms.Num() - 1))
+						{
+							tempData.roomType = requiredRooms.Pop(true);
+						}// Just make a room special randomly sometimes to spread them out through the level instead of leaving until last;
+						else if (FMath::RandBool() && (requiredRooms.Num() > 0))
+						{
+							tempData.roomType = requiredRooms.Pop(true);
+						}// Otherwise make it a normal room
+						else
+						{
+							tempData.roomType = 1;
+						}
+					}
 					else
 					{
 						tempData.roomType = 1;
 					}
-				}
-				else
-				{
-					tempData.roomType = 1;
-				}
 
-				tempData.xPos = x;
-				tempData.yPos = y;
+					tempData.xPos = xR;
+					tempData.yPos = yR;
 
-				roomData.Emplace(tempData);
-				++r;
+					roomData.Emplace(tempData);
+					++r;
+				}
 			}
 		}
 	}
@@ -498,9 +508,9 @@ void ALevelGenerator::spawnLevel()
 void ALevelGenerator::nextLevel()
 {
 	//Destroy all the level objects
-	for (auto& WallDoor : gm->allWallsDoors)
+	for (TActorIterator<AOublietteDoor> DoorItr(w); DoorItr; ++DoorItr)
 	{
-		w->DestroyActor(WallDoor);
+		w->DestroyActor(*DoorItr);
 	}
 	for (TActorIterator<AOublietteRoom> RoomItr(w); RoomItr; ++RoomItr)
 	{
@@ -523,13 +533,13 @@ void ALevelGenerator::nextLevel()
 		w->DestroyActor(*TrapDItr);
 	}
 	WallMeshInstances->ClearInstances();
-
+	gm->allWallsDoors.Empty();
 	//Spawn new level
 	spawnLevel();
 }
 
 //Sets all the variables needed to generate and spawn a level
-void ALevelGenerator::setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallBP, UClass* WallDoorBP, UClass* CharBP)
+void ALevelGenerator::setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallDoorBP)
 {
 	if (XSize >= 50)
 	{
@@ -555,8 +565,6 @@ void ALevelGenerator::setGenInfo(const int32 XSize, const int32 YSize, const int
 	roomSize = RoomSize;
 	roomMargins = RoomMargins;
 	roomBP = RoomBP;
-	wallBP = WallBP;
 	wallDoorBP = WallDoorBP;
-	//charBP = CharBP;
 }
 
