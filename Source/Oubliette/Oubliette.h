@@ -85,6 +85,12 @@ enum class EEnemyTypesEnum : uint8
 	ETE_Slime_Giant	UMETA(DisplayName = "Slime Giant")
 };
 
+UENUM(BlueprintType)
+enum class ERaceEnum : uint8
+{
+	ERE_Human	UMETA(DisplayName = "Human")
+};
+
 #pragma endregion ENUMS
 
 #pragma region STRUCTS
@@ -325,6 +331,10 @@ struct FLineageSaveStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	int32 Level;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	int32 Experience;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	ERaceEnum Race;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	FDateTime LastPlayed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	FLinearColor SkinColor;
@@ -334,6 +344,12 @@ struct FLineageSaveStruct
 	ESpellElemsEnum SpellElement;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	ESpellUtilsEnum UtilitySpell;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	TArray<FIntPoint> FormationTree;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	TArray<FIntPoint> ElementTree;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	TArray<FIntPoint> GeneralTree;
 };
 
 #pragma endregion STRUCTS
