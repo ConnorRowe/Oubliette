@@ -18,5 +18,10 @@ class OUBLIETTE_API UGameInstanceOubliette : public UGameInstance
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "Game Instance")
 	AOublietteCharacter* charRef;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")
+	int32 Track_EnemiesKilled;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")
+	int32 Track_FloorsComplete;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")
+	int32 Track_ItemsFound;
 };

@@ -333,6 +333,8 @@ struct FLineageSaveStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	int32 Experience;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	int32 SkillPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	ERaceEnum Race;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	FDateTime LastPlayed;

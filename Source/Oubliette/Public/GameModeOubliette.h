@@ -36,11 +36,4 @@ public:
 	TArray<FItemAffixStruct> ItemPrefixes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
 	TArray<FItemAffixStruct> ItemSuffixes;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
-	int32 Track_EnemiesKilled;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
-	int32 Track_FloorsComplete;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
-	int32 Track_ItemsFound;
-
 };
