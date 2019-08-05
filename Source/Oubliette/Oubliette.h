@@ -8,6 +8,7 @@
 #include "Engine/Classes/Particles/ParticleSystem.h"
 #include "Engine/Classes/Sound/SoundCue.h"
 #include "Engine/Classes/GameFramework/DamageType.h"
+#include "Engine/Texture.h"
 #include "OublietteSpell_Projectile.h"
 #include "OublietteSpell_Channel.h"
 #include "Oubliette.generated.h"
@@ -231,7 +232,7 @@ struct FItemStruct
 
 	//visual stuff
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	UMaterialInterface* Material;
+	UTexture* Icon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FLinearColor RColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
@@ -269,7 +270,7 @@ struct FItemDataTableStruct : public FTableRowBase
 
 	//visual stuff
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	UMaterialInterface* Material;
+	UTexture* Icon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
 	FLinearColor RColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
