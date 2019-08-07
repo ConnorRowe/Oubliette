@@ -206,23 +206,24 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 
 	TArray<int32> requiredRooms;
 
-	//Add treasure rooms
-	for (int i = 0; i < treasureRooms; ++i)
-	{
-		requiredRooms.Add(2);
-	}
-	//Add boss rooms
-	for (int i = 0; i < bossRooms; ++i)
-	{
-		requiredRooms.Add(3);
-	}
-
 	roomData.Empty();
+	requiredRooms.Empty();
 
 	//Prevent empty level bug
 	while (roomData.Num() < numRooms)
 	{
 		roomData.Empty();
+
+		//Add treasure rooms
+		for (int i = 0; i < treasureRooms; ++i)
+		{
+			requiredRooms.Add(2);
+		}
+		//Add boss rooms
+		for (int i = 0; i < bossRooms; ++i)
+		{
+			requiredRooms.Add(3);
+		}
 
 		//Parse array, setting all room IDs to 0 (empty)
 		for (int x = 0; x < 49; ++x)
@@ -306,19 +307,25 @@ TArray<FRoomData> ALevelGenerator::generateRooms()
 					//Don't let the first room be special - Sorry, first room!
 					if (r > 0)
 					{
-						//Make sure that there are enough rooms left for normal rooms to be generated
-						if (numRooms - r < (requiredRooms.Num() - 1))
+						bool madeSpecialRoom = false;
+
+						// Just make a room special randomly sometimes to spread them out through the level instead of leaving until last;
+						if (FMath::RandBool() && (requiredRooms.Num() > 0))
 						{
 							tempData.roomType = requiredRooms.Pop(true);
-						}// Just make a room special randomly sometimes to spread them out through the level instead of leaving until last;
-						else if (FMath::RandBool() && (requiredRooms.Num() > 0))
-						{
-							tempData.roomType = requiredRooms.Pop(true);
+							madeSpecialRoom = true;
 						}// Otherwise make it a normal room
 						else
 						{
 							tempData.roomType = 1;
 						}
+
+						//Make sure that there are enough rooms left for required rooms to be generated - basically last resort
+						if ((numRooms - r <= requiredRooms.Num()) && (!madeSpecialRoom) && (requiredRooms.Num() > 0))
+						{
+							tempData.roomType = requiredRooms.Pop(true);
+						}
+
 					}
 					else
 					{
