@@ -92,6 +92,16 @@ enum class ERaceEnum : uint8
 	ERE_Human	UMETA(DisplayName = "Human")
 };
 
+UENUM(BlueprintType)
+enum class EStatusEffectEnum : uint8
+{
+	ESEE_Bleeding	UMETA(DisplayName = "Bleeding"),
+	ESEE_Burning	UMETA(DisplayName = "Burning"),
+	ESEE_Chilled	UMETA(DisplayName = "Chilled"),
+	ESEE_Stunned	UMETA(DisplayName = "Stunned")
+};
+
+
 #pragma endregion ENUMS
 
 #pragma region STRUCTS

@@ -23,6 +23,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	//Status Effect Booleans
+	UPROPERTY(BlueprintReadWrite, Category = "Enemy")
+	bool isBleeding;
+	UPROPERTY(BlueprintReadWrite, Category = "Enemy")
+	bool isChilled;
+	UPROPERTY(BlueprintReadWrite, Category = "Enemy")
+	bool isBurning;
+	UPROPERTY(BlueprintReadWrite, Category = "Enemy")
+	bool isStunned;
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
