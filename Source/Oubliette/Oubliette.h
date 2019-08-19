@@ -175,7 +175,9 @@ struct FSpellChannelStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
 	UParticleSystem* HandParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	UParticleSystem* DamageParticle;
+	FSoftObjectPath ChannelNiagaraSys;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
+	FSoftObjectPath DamageNiagaraSys;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
 	USoundCue* LoopSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
