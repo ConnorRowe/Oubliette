@@ -215,7 +215,7 @@ void AOublietteCharacter::calcBaseDamage()
 		break;
 	}
 
-	BaseSpellDamage = baseDamage * (1 + Inte / 10) * (1 + elementalBonus);
+	BaseSpellDamage = baseDamage * (1.0f + (float)Inte / 10.0f) * (1.0f + (elementalBonus/100.0f));
 }
 
 FSpellDamageCalc AOublietteCharacter::calcSpellDamage()

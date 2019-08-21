@@ -62,7 +62,23 @@ enum class EStatsEnum : uint8
 	ESA_BetterLoot	UMETA(DisplayName = "% Better Chance of Finding Magical Items"),
 	ESA_DmgUndead	UMETA(DisplayName = "% Bonus Damage against Undead"),
 	ESA_DmgSlime	UMETA(DisplayName = "% Bonus Damage against Slimes"),
-	ESA_DmgBeasts	UMETA(DisplayName = "% Bonus Damage against Beasts")
+	ESA_DmgBeasts	UMETA(DisplayName = "% Bonus Damage against Beasts"),
+	ESA_SpawnEye	UMETA(DisplayName = "% chance to Spawn Eye"),
+	ESA_MagicSnails UMETA(DisplayName = "guarenteed Magic Snails"),
+	ESA_ShroomBonus UMETA(DisplayName = "% Shroom Bonus"),
+	ESA_NiceRats	UMETA(DisplayName = "Nice Rats"),
+	ESA_IgnoreDmg	UMETA(DisplayName = "% to Ignore Damage"),
+	ESA_ProjSpeed	UMETA(DisplayName = "% faster Projectile Speed"),
+	ESA_SpellPierce	UMETA(DisplayName = "% chance for Spell Pierce"),
+	ESA_DoubleRadius UMETA(DisplayName = "Double Radius Chance"),
+	ESA_BonusBurn	UMETA(DisplayName = "% bonus chance to ignite enemies"),
+	ESA_BonusChill	UMETA(DisplayName = "% bonus chance to chill enemies"),
+	ESA_BonusStun	UMETA(DisplayName = "% bonus chance to stun enemies"),
+	ESA_RegenManaChunkOnKill UMETA(DisplayName = "% chance to regenerate 10% mana on kill"),
+	ESA_CastSpeed	UMETA(DisplayName = "% faster cast speed"),
+	ESA_ChannelTickrate	UMETA(DisplayName = "% faster damage tick rate"),
+	ESA_ChannelRange	UMETA(DisplayName = "% faster further range")
+
 };
 
 UENUM(BlueprintType)
@@ -99,6 +115,20 @@ enum class EStatusEffectEnum : uint8
 	ESEE_Burning	UMETA(DisplayName = "Burning"),
 	ESEE_Chilled	UMETA(DisplayName = "Chilled"),
 	ESEE_Stunned	UMETA(DisplayName = "Stunned")
+};
+
+UENUM(BlueprintType)
+enum class EBuffEnum : uint8
+{
+	EBE_ManaShield	UMETA(DisplayName = "Mana Shield")
+};
+
+UENUM(BlueprintType)
+enum class EBuffSourceEnum : uint8
+{
+	EBSE_OnKill			UMETA(DisplayName = "On Kill"),
+	EBSE_OnHit			UMETA(DisplayName = "On Hit"),
+	EBSE_OnTakeDamage	UMETA(DisplayName = "On Take Damage")
 };
 
 
@@ -366,6 +396,24 @@ struct FLineageSaveStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	TArray<FIntPoint> GeneralTree;
 };
+
+USTRUCT(BlueprintType)
+struct FBuffStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	EBuffEnum Buff;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	FName Name;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	EBuffSourceEnum Source;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	float Chance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	float Power;
+};
+
 
 #pragma endregion STRUCTS
 
