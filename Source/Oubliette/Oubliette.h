@@ -77,7 +77,8 @@ enum class EStatsEnum : uint8
 	ESA_RegenManaChunkOnKill UMETA(DisplayName = "% chance to regenerate 10% mana on kill"),
 	ESA_CastSpeed	UMETA(DisplayName = "% faster cast speed"),
 	ESA_ChannelTickrate	UMETA(DisplayName = "% faster damage tick rate"),
-	ESA_ChannelRange	UMETA(DisplayName = "% faster further range")
+	ESA_ChannelRange	UMETA(DisplayName = "% faster further range"),
+	ESA_ArcToEnemy	UMETA(DisplayName = "% chance to arc to a nearby enemy")
 
 };
 
@@ -120,7 +121,8 @@ enum class EStatusEffectEnum : uint8
 UENUM(BlueprintType)
 enum class EBuffEnum : uint8
 {
-	EBE_ManaShield	UMETA(DisplayName = "Mana Shield")
+	EBE_ManaShield	UMETA(DisplayName = "Mana Shield"),
+	EBE_Clearcasting UMETA(DisplayName = "Clearcasting")
 };
 
 UENUM(BlueprintType)
@@ -128,7 +130,8 @@ enum class EBuffSourceEnum : uint8
 {
 	EBSE_OnKill			UMETA(DisplayName = "On Kill"),
 	EBSE_OnHit			UMETA(DisplayName = "On Hit"),
-	EBSE_OnTakeDamage	UMETA(DisplayName = "On Take Damage")
+	EBSE_OnTakeDamage	UMETA(DisplayName = "On Take Damage"),
+	EBSE_EveryXMinutes	UMETA(DisplayName = "Every X Minutes")
 };
 
 
@@ -408,10 +411,14 @@ struct FBuffStruct
 	FName Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
 	EBuffSourceEnum Source;
+
+	// 0.0 on a val means it takes it from the skill's modified point value
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
 	float Chance;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
 	float Power;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	float DurationSeconds;
 };
 
 

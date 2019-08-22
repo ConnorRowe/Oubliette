@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "OublietteCharacter.h"
+#include "Oubliette.h"
 #include "Engine/GameInstance.h"
 #include "GameInstanceOubliette.generated.h"
 
@@ -20,10 +21,14 @@ public:
 	AOublietteCharacter* charRef;
 	UPROPERTY(BlueprintReadWrite, Category = "Game Instance")
 	bool isGameOver;
+	UPROPERTY(BlueprintReadWrite, Category = "Character")
+	TArray<FStatStruct> SkillStats;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")
 	int32 Track_EnemiesKilled;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")
 	int32 Track_FloorsComplete;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")
 	int32 Track_ItemsFound;
+
+	void ApplySkillStats();
 };

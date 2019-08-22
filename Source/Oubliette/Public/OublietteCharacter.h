@@ -164,4 +164,37 @@ public:
 	int32 BonXP;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
 	int32 BonLoot;
+	//'less-standard' ones
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 SpawnEyeOnKill;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 MagicSnails;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 NiceRats;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 ShroomBonus;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 IgnoreDmg;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 ProjSpeed;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 SpellPierce;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 DoubleRadius;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonusBurn;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonusChill;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonusStun;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 RegenManaChunkOnKill;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 CastSpeed;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 ChannelTickrate;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 ChannelRange;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 ArcToEnemy;
 };
