@@ -31,4 +31,7 @@ public:
 	int32 Track_ItemsFound;
 
 	void ApplySkillStats();
+
+	UFUNCTION(BlueprintCallable, Category = "Game Stats")
+	void ClearTrackedVars();
 };

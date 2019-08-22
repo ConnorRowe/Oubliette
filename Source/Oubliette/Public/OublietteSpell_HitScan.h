@@ -14,4 +14,11 @@ class OUBLIETTE_API AOublietteSpell_HitScan : public AOublietteSpell
 {
 	GENERATED_BODY()
 	
+public:
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
+	void initHitScan(float CalcedDamage, TSubclassOf<UDamageType> Element, float DoubleExplodeChance);
+	virtual void initHitScan_Implementation(float CalcedDamage, TSubclassOf<UDamageType> Element, float DoubleExplodeChance);
+
+	UPROPERTY(BlueprintReadWrite, Category = "Spells")
+	float doubleExplodeChance;
 };

@@ -70,3 +70,10 @@ void UGameInstanceOubliette::ApplySkillStats()
 	}
 
 }
+
+void UGameInstanceOubliette::ClearTrackedVars()
+{
+	Track_EnemiesKilled = 0;
+	Track_FloorsComplete = 0;
+	Track_ItemsFound = 0;
+}
