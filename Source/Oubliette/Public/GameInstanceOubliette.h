@@ -23,6 +23,8 @@ public:
 	bool isGameOver;
 	UPROPERTY(BlueprintReadWrite, Category = "Character")
 	TArray<FStatStruct> SkillStats;
+	UPROPERTY(BlueprintReadWrite, Category = "Character")
+	TArray<FBuffStruct> SkillBuffs;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")
 	int32 Track_EnemiesKilled;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")

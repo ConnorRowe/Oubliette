@@ -13,6 +13,8 @@
 #include "OublietteSpell_Channel.h"
 #include "Oubliette.generated.h"
 
+#define GETENUMSTRING(etype, evalue) ( (FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true) != nullptr) ? FindObject<UEnum>(ANY_PACKAGE, TEXT(etype), true)->GetEnumName((int32)evalue) : FString("Invalid - are you sure enum uses UENUM() macro?") )
+
 #pragma region ENUMS
 
 UENUM(BlueprintType)
@@ -50,35 +52,37 @@ UENUM(BlueprintType)
 enum class EStatsEnum : uint8
 {
 	ESA_NONE,
-	ESA_Intellect	UMETA(DisplayName = "Intellect"),
-	ESA_Wisdom		UMETA(DisplayName = "Wisdom"),
-	ESA_Agility		UMETA(DisplayName = "Agility"),
-	ESA_BonusFire	UMETA(DisplayName = "Bonus Fire Damage"),
-	ESA_BonusFrost	UMETA(DisplayName = "Bonus Frost Damage"),
-	ESA_BonusShock	UMETA(DisplayName = "Bonus Shock Damage"),
-	ESA_BonusArcane UMETA(DisplayName = "Bonus Arcane Damage"),
-	ESA_BonusShadow	UMETA(DisplayName = "Bonus Shadow Damage"),
-	ESA_BonusXP		UMETA(DisplayName = "% Bonus XP"),
-	ESA_BetterLoot	UMETA(DisplayName = "% Better Chance of Finding Magical Items"),
-	ESA_DmgUndead	UMETA(DisplayName = "% Bonus Damage against Undead"),
-	ESA_DmgSlime	UMETA(DisplayName = "% Bonus Damage against Slimes"),
-	ESA_DmgBeasts	UMETA(DisplayName = "% Bonus Damage against Beasts"),
-	ESA_SpawnEye	UMETA(DisplayName = "% chance to Spawn Eye"),
-	ESA_MagicSnails UMETA(DisplayName = "guarenteed Magic Snails"),
-	ESA_ShroomBonus UMETA(DisplayName = "% Shroom Bonus"),
-	ESA_NiceRats	UMETA(DisplayName = "Nice Rats"),
-	ESA_IgnoreDmg	UMETA(DisplayName = "% to Ignore Damage"),
-	ESA_ProjSpeed	UMETA(DisplayName = "% faster Projectile Speed"),
-	ESA_SpellPierce	UMETA(DisplayName = "% chance for Spell Pierce"),
-	ESA_DoubleRadius UMETA(DisplayName = "Double Radius Chance"),
-	ESA_BonusBurn	UMETA(DisplayName = "% bonus chance to ignite enemies"),
-	ESA_BonusChill	UMETA(DisplayName = "% bonus chance to chill enemies"),
-	ESA_BonusStun	UMETA(DisplayName = "% bonus chance to stun enemies"),
-	ESA_RegenManaChunkOnKill UMETA(DisplayName = "% chance to regenerate 10% mana on kill"),
-	ESA_CastSpeed	UMETA(DisplayName = "% faster cast speed"),
-	ESA_ChannelTickrate	UMETA(DisplayName = "% faster damage tick rate"),
-	ESA_ChannelRange	UMETA(DisplayName = "% faster further range"),
-	ESA_ArcToEnemy	UMETA(DisplayName = "% chance to arc to a nearby enemy")
+	ESA_Intellect				UMETA(DisplayName = "Intellect"),
+	ESA_Wisdom					UMETA(DisplayName = "Wisdom"),
+	ESA_Agility					UMETA(DisplayName = "Agility"),
+	ESA_BonusFire				UMETA(DisplayName = "Bonus Fire Damage"),
+	ESA_BonusFrost				UMETA(DisplayName = "Bonus Frost Damage"),
+	ESA_BonusShock				UMETA(DisplayName = "Bonus Shock Damage"),
+	ESA_BonusArcane 			UMETA(DisplayName = "Bonus Arcane Damage"),
+	ESA_BonusShadow				UMETA(DisplayName = "Bonus Shadow Damage"),
+	ESA_BonusXP					UMETA(DisplayName = "% Bonus XP"),
+	ESA_BetterLoot				UMETA(DisplayName = "% Better Chance of Finding Magical Items"),
+	ESA_DmgUndead				UMETA(DisplayName = "% Bonus Damage against Undead"),
+	ESA_DmgSlime				UMETA(DisplayName = "% Bonus Damage against Slimes"),
+	ESA_DmgBeasts				UMETA(DisplayName = "% Bonus Damage against Beasts"),
+	ESA_SpawnEye				UMETA(DisplayName = "% chance to Spawn Eye"),
+	ESA_MagicSnails 			UMETA(DisplayName = "guarenteed Magic Snails"),
+	ESA_ShroomBonus 			UMETA(DisplayName = "% Shroom Bonus"),
+	ESA_NiceRats				UMETA(DisplayName = "Nice Rats"),
+	ESA_IgnoreDmg				UMETA(DisplayName = "% to Ignore Damage"),
+	ESA_ProjSpeed				UMETA(DisplayName = "% faster Projectile Speed"),
+	ESA_SpellPierce				UMETA(DisplayName = "% chance for Spell Pierce"),
+	ESA_DoubleRadius			UMETA(DisplayName = "Double Radius Chance"),
+	ESA_BonusBurn				UMETA(DisplayName = "% bonus chance to ignite enemies"),
+	ESA_BonusChill				UMETA(DisplayName = "% bonus chance to chill enemies"),
+	ESA_BonusStun				UMETA(DisplayName = "% bonus chance to stun enemies"),
+	ESA_RegenManaChunkOnKill	UMETA(DisplayName = "% chance to regenerate 10% mana on kill"),
+	ESA_CastSpeed				UMETA(DisplayName = "% faster cast speed"),
+	ESA_ChannelTickrate			UMETA(DisplayName = "% faster damage tick rate"),
+	ESA_ChannelRange			UMETA(DisplayName = "% faster further range"),
+	ESA_ArcToEnemy				UMETA(DisplayName = "% chance to arc to a nearby enemy"),
+	ESA_DamageShield			UMETA(DisplayName = "While stat is at 1.0, can absorb one attack"),
+	ESA_ManaCostReduction		UMETA(DisplayName = "Reduces mana costs")
 
 };
 
@@ -131,7 +135,8 @@ enum class EBuffSourceEnum : uint8
 	EBSE_OnKill			UMETA(DisplayName = "On Kill"),
 	EBSE_OnHit			UMETA(DisplayName = "On Hit"),
 	EBSE_OnTakeDamage	UMETA(DisplayName = "On Take Damage"),
-	EBSE_EveryXMinutes	UMETA(DisplayName = "Every X Minutes")
+	EBSE_EveryXMinutes	UMETA(DisplayName = "Every X Minutes"),
+	EBSE_OnCast			UMETA(DisplayName = "On Cast")
 };
 
 
@@ -411,6 +416,8 @@ struct FBuffStruct
 	FName Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
 	EBuffSourceEnum Source;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	EStatsEnum Stat;
 
 	// 0.0 on a val means it takes it from the skill's modified point value
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")

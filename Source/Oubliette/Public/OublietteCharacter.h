@@ -46,6 +46,20 @@ struct FSpellDamageCalc
 	bool isCrit = false;
 };
 
+struct FCurrentBuff
+{
+	EStatsEnum Stat;
+	float StatAmount;
+	float StartTime;
+	float Duration;
+
+	//override '==' operator so that TArray.Find() works.
+	FORCEINLINE bool operator==(const FCurrentBuff &Other) const
+	{
+		return (Stat == Other.Stat && StatAmount == Other.StatAmount && Duration == Other.Duration);
+	}
+};
+
 
 UCLASS()
 class OUBLIETTE_API AOublietteCharacter : public ACharacter, public IGenericTeamAgentInterface
@@ -84,6 +98,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
 	FSpellDamageCalc calcSpellDamage();
 
+	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
+	void addToStat(EStatsEnum Stat, float Amount);
+
+	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
+	void applyBuff(const FBuffStruct& buff);
+	void removeBuff(const FCurrentBuff& buff);
+
+	void updateCurrentBuffs();
+
 
 	//Gameplay variables
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
@@ -94,6 +117,14 @@ public:
 	bool bIsDead;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
 	bool bInputEnabled;
+
+	//Buff arrays from skill trees
+	TArray<FBuffStruct> Buffs_OnHit;
+	TArray<FBuffStruct> Buffs_OnKill;
+	TArray<FBuffStruct> Buffs_OnTakeDamage;
+	TArray<FBuffStruct> Buffs_OnCast;
+
+	TArray<FCurrentBuff> CurrentBuffs;
 
 	//Spell vars
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
@@ -197,4 +228,8 @@ public:
 	int32 ChannelRange;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
 	int32 ArcToEnemy;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 DamageShield;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 ManaCostReduction;
 };

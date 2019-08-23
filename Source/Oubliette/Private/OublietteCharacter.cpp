@@ -29,6 +29,7 @@ void AOublietteCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	updateCurrentBuffs();
 }
 
 // Called to bind functionality to input
@@ -108,51 +109,7 @@ void AOublietteCharacter::calculateStats()
 	{
 		for (auto& Stat : Item.Stats)
 		{
-			switch (Stat.StatType)
-			{
-			case EStatsEnum::ESA_Agility:
-				Agil += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_BetterLoot:
-				BonLoot += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_BonusArcane:
-				BonArcane += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_BonusFire:
-				BonFire += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_BonusFrost:
-				BonFrost += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_BonusShadow:
-				BonShadow += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_BonusShock:
-				BonShock += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_BonusXP:
-				BonXP += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_DmgUndead:
-				BonUndead += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_DmgBeasts:
-				BonBeast += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_DmgSlime:
-				BonSlime += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_Intellect:
-				Inte += Stat.StatAmount;
-				break;
-			case EStatsEnum::ESA_Wisdom:
-				Wisd += Stat.StatAmount;
-				break;
-
-			default:
-				break;
-			}
+			addToStat(Stat.StatType, Stat.StatAmount);
 		}
 	}
 }
@@ -234,4 +191,149 @@ FSpellDamageCalc AOublietteCharacter::calcSpellDamage()
 	}
 
 	return spellDmg;
+}
+
+void AOublietteCharacter::addToStat(EStatsEnum Stat, float Amount)
+{
+	switch (Stat)
+	{
+	case EStatsEnum::ESA_Agility:
+		Agil += Amount;
+		break;
+	case EStatsEnum::ESA_BetterLoot:
+		BonLoot += Amount;
+		break;
+	case EStatsEnum::ESA_BonusArcane:
+		BonArcane += Amount;
+		break;
+	case EStatsEnum::ESA_BonusFire:
+		BonFire += Amount;
+		break;
+	case EStatsEnum::ESA_BonusFrost:
+		BonFrost += Amount;
+		break;
+	case EStatsEnum::ESA_BonusShadow:
+		BonShadow += Amount;
+		break;
+	case EStatsEnum::ESA_BonusShock:
+		BonShock += Amount;
+		break;
+	case EStatsEnum::ESA_BonusXP:
+		BonXP += Amount;
+		break;
+	case EStatsEnum::ESA_DmgUndead:
+		BonUndead += Amount;
+		break;
+	case EStatsEnum::ESA_DmgBeasts:
+		BonBeast += Amount;
+		break;
+	case EStatsEnum::ESA_DmgSlime:
+		BonSlime += Amount;
+		break;
+	case EStatsEnum::ESA_Intellect:
+		Inte += Amount;
+		break;
+	case EStatsEnum::ESA_Wisdom:
+		Wisd += Amount;
+		break;
+	case EStatsEnum::ESA_SpawnEye:
+		SpawnEyeOnKill += Amount;
+		break;
+	case EStatsEnum::ESA_MagicSnails:
+		MagicSnails += Amount;
+		break;
+	case EStatsEnum::ESA_ShroomBonus:
+		NiceRats += Amount;
+		break;
+	case EStatsEnum::ESA_NiceRats:
+		ShroomBonus += Amount;
+		break;
+	case EStatsEnum::ESA_IgnoreDmg:
+		IgnoreDmg += Amount;
+		break;
+	case EStatsEnum::ESA_ProjSpeed:
+		ProjSpeed += Amount;
+		break;
+	case EStatsEnum::ESA_SpellPierce:
+		SpellPierce += Amount;
+		break;
+	case EStatsEnum::ESA_DoubleRadius:
+		DoubleRadius += Amount;
+		break;
+	case EStatsEnum::ESA_BonusBurn:
+		BonusBurn += Amount;
+		break;
+	case EStatsEnum::ESA_BonusChill:
+		BonusChill += Amount;
+		break;
+	case EStatsEnum::ESA_BonusStun:
+		BonusStun += Amount;
+		break;
+	case EStatsEnum::ESA_RegenManaChunkOnKill:
+		RegenManaChunkOnKill += Amount;
+		break;
+	case EStatsEnum::ESA_CastSpeed:
+		CastSpeed += Amount;
+		break;
+	case EStatsEnum::ESA_ChannelTickrate:
+		ChannelTickrate += Amount;
+		break;
+	case EStatsEnum::ESA_ChannelRange:
+		ChannelRange += Amount;
+		break;
+	case EStatsEnum::ESA_ArcToEnemy:
+		ArcToEnemy += Amount;
+		break;
+	case EStatsEnum::ESA_DamageShield:
+		DamageShield += Amount;
+		break;
+	case EStatsEnum::ESA_ManaCostReduction:
+		ManaCostReduction += Amount;
+		break;
+	default:
+		break;
+	}
+}
+
+void AOublietteCharacter::applyBuff(const FBuffStruct & buff)
+{
+	FCurrentBuff newBuff;
+	newBuff.StartTime = GetWorld()->GetRealTimeSeconds();
+	newBuff.Duration = buff.DurationSeconds;
+	newBuff.Stat = buff.Stat;
+	newBuff.StatAmount = buff.Power;
+
+	addToStat(buff.Stat, buff.Power);
+
+	CurrentBuffs.Add(newBuff);
+
+	FString bufflog;
+	bufflog = "Buff Applied: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.Power) + ", for " + FString::SanitizeFloat(buff.DurationSeconds) + " seconds";
+	UE_LOG(LogTemp, Warning, TEXT("___ %s ___ "), *bufflog);
+}
+
+void AOublietteCharacter::removeBuff(const FCurrentBuff & buff)
+{
+	addToStat(buff.Stat, buff.StatAmount*-1.0f);
+
+	FString bufflog;
+	bufflog = "Buff Removed: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.StatAmount) + ", for " + FString::SanitizeFloat(buff.Duration) + " seconds";
+	UE_LOG(LogTemp, Warning, TEXT("___ %s ___ "), *bufflog);
+
+	CurrentBuffs.RemoveSingle(buff);
+}
+
+void AOublietteCharacter::updateCurrentBuffs()
+{
+	if (CurrentBuffs.Num() > 0)
+	{
+		for (const auto& Buff : CurrentBuffs)
+		{
+			if (GetWorld()->GetRealTimeSeconds() >= (Buff.StartTime + Buff.Duration))
+			{
+				removeBuff(Buff);
+				break;
+			}
+		}
+	}
 }
