@@ -32,7 +32,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Stats")
 	int32 Track_ItemsFound;
 
-	void ApplySkillStats();
+	void ApplySkillStatsAndBuffs();
 
 	UFUNCTION(BlueprintCallable, Category = "Game Stats")
 	void ClearTrackedVars();

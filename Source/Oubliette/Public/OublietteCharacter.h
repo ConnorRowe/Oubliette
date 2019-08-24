@@ -49,6 +49,7 @@ struct FSpellDamageCalc
 struct FCurrentBuff
 {
 	EStatsEnum Stat;
+	FName Name;
 	float StatAmount;
 	float StartTime;
 	float Duration;
@@ -87,6 +88,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
+	void BuffApplied(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
+	virtual void BuffApplied_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
+	void BuffRemoved(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
+	virtual void BuffRemoved_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
+
+
 	UFUNCTION(BlueprintCallable, Category = "Character | Utility")
 	FLineTraceData tryLineTrace(float traceLength, USceneComponent* startComp);
 
@@ -104,8 +114,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
 	void applyBuff(const FBuffStruct& buff);
 	void removeBuff(const FCurrentBuff& buff);
-
 	void updateCurrentBuffs();
+	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
+	void tryActivateBuff(const EBuffSourceEnum & Source);
 
 
 	//Gameplay variables
@@ -123,6 +134,7 @@ public:
 	TArray<FBuffStruct> Buffs_OnKill;
 	TArray<FBuffStruct> Buffs_OnTakeDamage;
 	TArray<FBuffStruct> Buffs_OnCast;
+	TArray<FBuffStruct> Buffs_EveryXMinutes;
 
 	TArray<FCurrentBuff> CurrentBuffs;
 

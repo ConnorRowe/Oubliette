@@ -44,6 +44,14 @@ FGenericTeamId AOublietteCharacter::GetGenericTeamId() const
 	return TeamId;
 }
 
+void AOublietteCharacter::BuffApplied_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration)
+{
+}
+
+void AOublietteCharacter::BuffRemoved_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration)
+{
+}
+
 //attempt a single line trace from a given component
 FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneComponent* startComp)
 {
@@ -298,6 +306,7 @@ void AOublietteCharacter::addToStat(EStatsEnum Stat, float Amount)
 void AOublietteCharacter::applyBuff(const FBuffStruct & buff)
 {
 	FCurrentBuff newBuff;
+	newBuff.Name = buff.Name;
 	newBuff.StartTime = GetWorld()->GetRealTimeSeconds();
 	newBuff.Duration = buff.DurationSeconds;
 	newBuff.Stat = buff.Stat;
@@ -306,6 +315,8 @@ void AOublietteCharacter::applyBuff(const FBuffStruct & buff)
 	addToStat(buff.Stat, buff.Power);
 
 	CurrentBuffs.Add(newBuff);
+
+	BuffApplied(buff.Stat, buff.Name, buff.Power, newBuff.StartTime, buff.DurationSeconds);
 
 	FString bufflog;
 	bufflog = "Buff Applied: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.Power) + ", for " + FString::SanitizeFloat(buff.DurationSeconds) + " seconds";
@@ -319,6 +330,8 @@ void AOublietteCharacter::removeBuff(const FCurrentBuff & buff)
 	FString bufflog;
 	bufflog = "Buff Removed: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.StatAmount) + ", for " + FString::SanitizeFloat(buff.Duration) + " seconds";
 	UE_LOG(LogTemp, Warning, TEXT("___ %s ___ "), *bufflog);
+
+	BuffRemoved(buff.Stat, buff.Name, buff.StatAmount, buff.StartTime, buff.Duration);
 
 	CurrentBuffs.RemoveSingle(buff);
 }
@@ -334,6 +347,46 @@ void AOublietteCharacter::updateCurrentBuffs()
 				removeBuff(Buff);
 				break;
 			}
+		}
+	}
+}
+
+void AOublietteCharacter::tryActivateBuff(const EBuffSourceEnum & Source)
+{
+	TArray<FBuffStruct>* Buffs = nullptr;
+
+	switch (Source)
+	{
+	case EBuffSourceEnum::EBSE_EveryXMinutes:
+		Buffs = &Buffs_EveryXMinutes;
+		break;
+	case EBuffSourceEnum::EBSE_OnCast:
+		Buffs = &Buffs_OnCast;
+		break;
+	case EBuffSourceEnum::EBSE_OnHit:
+		Buffs = &Buffs_OnHit;
+		break;
+	case EBuffSourceEnum::EBSE_OnKill:
+		Buffs = &Buffs_OnKill;
+		break;
+	case EBuffSourceEnum::EBSE_OnTakeDamage:
+		Buffs = &Buffs_OnTakeDamage;
+		break;
+
+	default:
+		break;
+	}
+
+	//Ensure pointer is valid
+	check(Buffs);
+
+	for (auto Buff : *Buffs)
+	{
+		float r = FMath::RandRange(0.0f,1.0f);
+
+		if (Buff.Chance > 0.0f && r <= Buff.Chance)
+		{
+			applyBuff(Buff);
 		}
 	}
 }

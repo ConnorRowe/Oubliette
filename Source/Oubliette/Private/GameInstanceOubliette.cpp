@@ -3,72 +3,37 @@
 
 #include "GameInstanceOubliette.h"
 
-void UGameInstanceOubliette::ApplySkillStats()
+void UGameInstanceOubliette::ApplySkillStatsAndBuffs()
 {
 	for (auto & Stat : SkillStats)
 	{
-		switch (Stat.StatType)
+		charRef->addToStat(Stat.StatType, Stat.StatAmount);
+	}
+
+	for (auto & Buff : SkillBuffs)
+	{
+		switch (Buff.Source)
 		{
-		case EStatsEnum::ESA_ArcToEnemy:
-			charRef->ArcToEnemy += Stat.StatAmount;
+		case EBuffSourceEnum::EBSE_EveryXMinutes:
+			charRef->Buffs_EveryXMinutes.Add(Buff);
 			break;
-		case EStatsEnum::ESA_BetterLoot:
-			charRef->BonLoot += Stat.StatAmount;
+		case EBuffSourceEnum::EBSE_OnCast:
+			charRef->Buffs_OnCast.Add(Buff);
 			break;
-		case EStatsEnum::ESA_BonusBurn:
-			charRef->BonusBurn += Stat.StatAmount;
+		case EBuffSourceEnum::EBSE_OnHit:
+			charRef->Buffs_OnHit.Add(Buff);
 			break;
-		case EStatsEnum::ESA_BonusChill:
-			charRef->BonusChill += Stat.StatAmount;
+		case EBuffSourceEnum::EBSE_OnKill:
+			charRef->Buffs_OnKill.Add(Buff);
 			break;
-		case EStatsEnum::ESA_BonusStun:
-			charRef->BonusStun += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_BonusXP:
-			charRef->BonXP += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_CastSpeed:
-			charRef->CastSpeed += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_ChannelRange:
-			charRef->ChannelRange += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_ChannelTickrate:
-			charRef->ChannelTickrate += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_DoubleRadius:
-			charRef->DoubleRadius += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_IgnoreDmg:
-			charRef->IgnoreDmg += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_MagicSnails:
-			charRef->MagicSnails += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_NiceRats:
-			charRef->NiceRats += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_ProjSpeed:
-			charRef->ProjSpeed += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_RegenManaChunkOnKill:
-			charRef->RegenManaChunkOnKill += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_ShroomBonus:
-			charRef->ShroomBonus += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_SpawnEye:
-			charRef->SpawnEyeOnKill += Stat.StatAmount;
-			break;
-		case EStatsEnum::ESA_SpellPierce:
-			charRef->SpellPierce += Stat.StatAmount;
+		case EBuffSourceEnum::EBSE_OnTakeDamage:
+			charRef->Buffs_OnTakeDamage.Add(Buff);
 			break;
 
 		default:
 			break;
 		}
 	}
-
 }
 
 void UGameInstanceOubliette::ClearTrackedVars()
