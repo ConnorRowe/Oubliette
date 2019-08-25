@@ -145,6 +145,21 @@ enum class EBuffSourceEnum : uint8
 #pragma region STRUCTS
 
 USTRUCT(BlueprintType)
+struct FIconStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	UTexture* Icon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	FLinearColor RColour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	FLinearColor GColour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	FLinearColor BColour;
+};
+
+USTRUCT(BlueprintType)
 struct FActiveSpellStruct
 {
 	GENERATED_BODY()
@@ -426,6 +441,12 @@ struct FBuffStruct
 	float Power;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
 	float DurationSeconds;
+	
+	//Rendering stuff
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	bool isHidden;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+	FIconStruct BuffIcon;
 };
 
 

@@ -53,6 +53,8 @@ struct FCurrentBuff
 	float StatAmount;
 	float StartTime;
 	float Duration;
+	float IsHidden;
+	FIconStruct Icon;
 
 	//override '==' operator so that TArray.Find() works.
 	FORCEINLINE bool operator==(const FCurrentBuff &Other) const
@@ -88,8 +90,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
-	void BuffApplied(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
-	virtual void BuffApplied_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
+	void BuffApplied(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon);
+	virtual void BuffApplied_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon);
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
 	void BuffRemoved(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
@@ -112,7 +114,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
 	void applyBuff(const FBuffStruct& buff);
-	void applyBuff(const FCurrentBuff& buff);
+	void applyBuff(const FCurrentBuff & buff);
 	void removeBuff(const FCurrentBuff& buff);
 	void updateCurrentBuffs();
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")

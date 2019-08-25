@@ -44,7 +44,7 @@ FGenericTeamId AOublietteCharacter::GetGenericTeamId() const
 	return TeamId;
 }
 
-void AOublietteCharacter::BuffApplied_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration)
+void AOublietteCharacter::BuffApplied_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon)
 {
 }
 
@@ -311,6 +311,8 @@ void AOublietteCharacter::applyBuff(const FBuffStruct & buff)
 	newBuff.Duration = buff.DurationSeconds;
 	newBuff.Stat = buff.Stat;
 	newBuff.StatAmount = buff.Power;
+	newBuff.IsHidden = buff.isHidden;
+	newBuff.Icon = buff.BuffIcon;
 
 	applyBuff(newBuff);
 }
@@ -321,7 +323,7 @@ void AOublietteCharacter::applyBuff(const FCurrentBuff & buff)
 
 	CurrentBuffs.Add(buff);
 
-	BuffApplied(buff.Stat, buff.Name, buff.StatAmount, buff.StartTime, buff.Duration);
+	BuffApplied(buff.Stat, buff.Name, buff.StatAmount, buff.StartTime, buff.Duration, buff.IsHidden, buff.Icon);
 
 	FString bufflog;
 	bufflog = "Buff Applied: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.StatAmount) + ", for " + FString::SanitizeFloat(buff.Duration) + " seconds";

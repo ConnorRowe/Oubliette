@@ -23,6 +23,8 @@ void UGameInstanceOubliette::ApplySkillStatsAndBuffs()
 			cBuff.Name = Buff.Name;
 			cBuff.Stat = Buff.Stat;
 			cBuff.StatAmount = Buff.Power;
+			cBuff.Icon = Buff.BuffIcon;
+			cBuff.IsHidden = Buff.isHidden;
 			charRef->Buffs_Reccuring.Add(cBuff);
 			break;
 		}
