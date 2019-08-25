@@ -135,7 +135,7 @@ enum class EBuffSourceEnum : uint8
 	EBSE_OnKill			UMETA(DisplayName = "On Kill"),
 	EBSE_OnHit			UMETA(DisplayName = "On Hit"),
 	EBSE_OnTakeDamage	UMETA(DisplayName = "On Take Damage"),
-	EBSE_EveryXMinutes	UMETA(DisplayName = "Every X Minutes"),
+	EBSE_Reccuring		UMETA(DisplayName = "Reccuring"),
 	EBSE_OnCast			UMETA(DisplayName = "On Cast")
 };
 

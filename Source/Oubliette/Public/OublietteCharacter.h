@@ -61,7 +61,6 @@ struct FCurrentBuff
 	}
 };
 
-
 UCLASS()
 class OUBLIETTE_API AOublietteCharacter : public ACharacter, public IGenericTeamAgentInterface
 {
@@ -113,10 +112,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
 	void applyBuff(const FBuffStruct& buff);
+	void applyBuff(const FCurrentBuff& buff);
 	void removeBuff(const FCurrentBuff& buff);
 	void updateCurrentBuffs();
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
 	void tryActivateBuff(const EBuffSourceEnum & Source);
+	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
+	bool buffExistsByName(const FName Name);
+	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
+	void RemoveBuffByName(const FName Name);
 
 
 	//Gameplay variables
@@ -134,7 +138,7 @@ public:
 	TArray<FBuffStruct> Buffs_OnKill;
 	TArray<FBuffStruct> Buffs_OnTakeDamage;
 	TArray<FBuffStruct> Buffs_OnCast;
-	TArray<FBuffStruct> Buffs_EveryXMinutes;
+	TArray<FCurrentBuff> Buffs_Reccuring;
 
 	TArray<FCurrentBuff> CurrentBuffs;
 

@@ -14,9 +14,18 @@ void UGameInstanceOubliette::ApplySkillStatsAndBuffs()
 	{
 		switch (Buff.Source)
 		{
-		case EBuffSourceEnum::EBSE_EveryXMinutes:
-			charRef->Buffs_EveryXMinutes.Add(Buff);
+		case EBuffSourceEnum::EBSE_Reccuring:
+		{
+			//Reccuring buffs use a different method of application so they directly are constructed with the FCurrentBuff struct
+			FCurrentBuff cBuff;
+			cBuff.Duration = Buff.DurationSeconds;
+			cBuff.StartTime = 0.0f;
+			cBuff.Name = Buff.Name;
+			cBuff.Stat = Buff.Stat;
+			cBuff.StatAmount = Buff.Power;
+			charRef->Buffs_Reccuring.Add(cBuff);
 			break;
+		}
 		case EBuffSourceEnum::EBSE_OnCast:
 			charRef->Buffs_OnCast.Add(Buff);
 			break;

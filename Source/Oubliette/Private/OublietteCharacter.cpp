@@ -312,14 +312,19 @@ void AOublietteCharacter::applyBuff(const FBuffStruct & buff)
 	newBuff.Stat = buff.Stat;
 	newBuff.StatAmount = buff.Power;
 
-	addToStat(buff.Stat, buff.Power);
+	applyBuff(newBuff);
+}
 
-	CurrentBuffs.Add(newBuff);
+void AOublietteCharacter::applyBuff(const FCurrentBuff & buff)
+{
+	addToStat(buff.Stat, buff.StatAmount);
 
-	BuffApplied(buff.Stat, buff.Name, buff.Power, newBuff.StartTime, buff.DurationSeconds);
+	CurrentBuffs.Add(buff);
+
+	BuffApplied(buff.Stat, buff.Name, buff.StatAmount, buff.StartTime, buff.Duration);
 
 	FString bufflog;
-	bufflog = "Buff Applied: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.Power) + ", for " + FString::SanitizeFloat(buff.DurationSeconds) + " seconds";
+	bufflog = "Buff Applied: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.StatAmount) + ", for " + FString::SanitizeFloat(buff.Duration) + " seconds";
 	UE_LOG(LogTemp, Warning, TEXT("___ %s ___ "), *bufflog);
 }
 
@@ -338,14 +343,30 @@ void AOublietteCharacter::removeBuff(const FCurrentBuff & buff)
 
 void AOublietteCharacter::updateCurrentBuffs()
 {
+	float time = GetWorld()->GetTimeSeconds();
+
+	//Update current buffs
 	if (CurrentBuffs.Num() > 0)
 	{
 		for (const auto& Buff : CurrentBuffs)
 		{
-			if (GetWorld()->GetRealTimeSeconds() >= (Buff.StartTime + Buff.Duration))
+			if (time >= (Buff.StartTime + Buff.Duration))
 			{
 				removeBuff(Buff);
 				break;
+			}
+		}
+	}
+
+	//Update reccuring buffs, which are not removed and constantly reapply themselves
+	if (Buffs_Reccuring.Num() > 0)
+	{
+		for (FCurrentBuff & Buff : Buffs_Reccuring)
+		{
+			if ((time >= (Buff.StartTime + Buff.Duration)) && !buffExistsByName(Buff.Name))
+			{
+				Buff.StartTime = time;
+				applyBuff(Buff);
 			}
 		}
 	}
@@ -357,9 +378,6 @@ void AOublietteCharacter::tryActivateBuff(const EBuffSourceEnum & Source)
 
 	switch (Source)
 	{
-	case EBuffSourceEnum::EBSE_EveryXMinutes:
-		Buffs = &Buffs_EveryXMinutes;
-		break;
 	case EBuffSourceEnum::EBSE_OnCast:
 		Buffs = &Buffs_OnCast;
 		break;
@@ -388,5 +406,44 @@ void AOublietteCharacter::tryActivateBuff(const EBuffSourceEnum & Source)
 		{
 			applyBuff(Buff);
 		}
+	}
+}
+
+//Searches for a buff with the given FName and returns true if it was found
+bool AOublietteCharacter::buffExistsByName(const FName Name)
+{
+	bool hasFoundBuff = false;
+
+	for (const auto & Buff : CurrentBuffs)
+	{
+		if (Buff.Name == Name)
+		{
+			hasFoundBuff = true;
+			break;
+		}
+	}
+
+	return hasFoundBuff;
+}
+
+//Attempts to remove a buff with the given FName
+void AOublietteCharacter::RemoveBuffByName(const FName Name)
+{
+	FCurrentBuff* foundBuff = nullptr;
+
+	if (buffExistsByName(Name))
+	{
+		//Get a pointer to the buff
+		for (FCurrentBuff Buff : CurrentBuffs)
+		{
+			if (Buff.Name == Name)
+			{
+				foundBuff = &Buff;
+				break;
+			}
+		}
+
+		//Remove the buff
+		removeBuff(*foundBuff);
 	}
 }
