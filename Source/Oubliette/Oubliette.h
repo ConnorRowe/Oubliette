@@ -139,6 +139,14 @@ enum class EBuffSourceEnum : uint8
 	EBSE_OnCast			UMETA(DisplayName = "On Cast")
 };
 
+UENUM(BlueprintType)
+enum class ESortMethodEnum : uint8
+{
+	ESME_Name			UMETA(DisplayName = "Name"),
+	ESME_Level			UMETA(DisplayName = "Level"),
+	ESME_DateTime		UMETA(DisplayName = "DateTime")
+};
+
 
 #pragma endregion ENUMS
 
