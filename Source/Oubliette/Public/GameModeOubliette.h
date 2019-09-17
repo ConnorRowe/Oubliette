@@ -36,4 +36,7 @@ public:
 	TArray<FItemAffixStruct> ItemPrefixes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
 	TArray<FItemAffixStruct> ItemSuffixes;
+
+	UFUNCTION(BlueprintCallable, Category = "Items")
+	FItemStruct GenerateItemFromPool(const FItemPoolStruct ItemPool);
 };
