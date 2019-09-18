@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "OublietteCharacter.h"
 #include "GameModeOubliette.h"
+#include "OublietteCharacter.h"
 
 FItemStruct AGameModeOubliette::GenerateItemFromPool(const FItemPoolStruct ItemPool)
 {

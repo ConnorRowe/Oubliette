@@ -394,6 +394,23 @@ struct FTalentToolTipStructNEW
 };
 
 USTRUCT(BlueprintType)
+struct FAncestorStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	FName FirstName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	int32 Level;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	FDateTime DateTimeKilled;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	FName KilledByName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	FName LevelName;
+};
+
+USTRUCT(BlueprintType)
 struct FLineageSaveStruct
 {
 	GENERATED_BODY()
@@ -426,6 +443,10 @@ struct FLineageSaveStruct
 	TArray<FIntPoint> ElementTree;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
 	TArray<FIntPoint> GeneralTree;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	TArray<FAncestorStruct> Ancestors;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+	FName FirstName;
 };
 
 USTRUCT(BlueprintType)
