@@ -1,31 +1,35 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "OublietteCharacter.h"
 #include "GameModeOubliette.h"
 
 FItemStruct AGameModeOubliette::GenerateItemFromPool(const FItemPoolStruct ItemPool)
 {
-	const int rarity = FMath::RandRange(0, 4);
+	// get random float and add the character's bonus loot stat to it
+	float rarity = (FMath::FRand());
+	rarity *= 1.0f + ((float)charRef->BonLoot / 100.0f);
 
 	TArray<FItemStruct> possibleItems;
 
-	switch (rarity)
+	if (rarity <= 0.45f)
 	{
-	case 0:
 		possibleItems = ItemPool.Common;
-		break;
-	case 1:
+	}
+	else if (rarity > 0.45f && rarity <= 0.7f)
+	{
 		possibleItems = ItemPool.Uncommon;
-		break;
-	case 2:
+	}
+	else if (rarity > 0.7f && rarity <= 0.85f)
+	{
 		possibleItems = ItemPool.Rare;
-		break;
-	case 3:
+	}
+	else if (rarity > 0.85f && rarity <= 0.95f)
+	{
 		possibleItems = ItemPool.Epic;
-		break;
-	case 4:
+	}
+	else if (rarity > 0.95f)
+	{
 		possibleItems = ItemPool.Legendary;
-		break;
 	}
 	
 	FItemStruct newItem = possibleItems[FMath::RandRange(0,possibleItems.Num()-1)];

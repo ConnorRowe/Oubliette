@@ -7,6 +7,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameModeOubliette.generated.h"
 
+//~~~ Forward Declarations
+class AOublietteCharacter;
+
 /**
  * 
  */
@@ -39,4 +42,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Items")
 	FItemStruct GenerateItemFromPool(const FItemPoolStruct ItemPool);
+
+	AOublietteCharacter* charRef;
 };

@@ -181,6 +181,7 @@ void ALevelGenerator::BeginPlay()
 	//Set character reference in game instance
 	gi->charRef = charRef;
 	gi->ApplySkillStatsAndBuffs();
+	gm->charRef = charRef;
 
 	Super::BeginPlay();
 
