@@ -450,6 +450,23 @@ struct FLineageSaveStruct
 };
 
 USTRUCT(BlueprintType)
+struct FSaveSlotStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
+	int32 SaveID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
+	int32 MetaID;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
+	FString LineageName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
+	int32 LineageLevel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
+	FDateTime DTLastPlayed;
+};
+
+USTRUCT(BlueprintType)
 struct FBuffStruct
 {
 	GENERATED_BODY()

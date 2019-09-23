@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Oubliette.h"
+#include "OublietteSaveSlot.h"
 #include "Algo/Reverse.h"
 #include "Blueprint/UserWidget.h"
 #include "OublietteStartScreen.generated.h"
@@ -18,6 +19,6 @@ class OUBLIETTE_API UOublietteStartScreen : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Saves")
-	TArray<FLineageSaveStruct> SortSaves(TArray<FLineageSaveStruct> SaveArray, ESortMethodEnum SortMethod, bool isInverse);
+	TArray<FSaveSlotStruct> SortSaves(TArray<FSaveSlotStruct> SaveSlots, ESortMethodEnum SortMethod, bool isInverse);
 
 };
