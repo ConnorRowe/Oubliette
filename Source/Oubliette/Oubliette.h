@@ -82,8 +82,10 @@ enum class EStatsEnum : uint8
 	ESA_ChannelRange			UMETA(DisplayName = "% faster further range"),
 	ESA_ArcToEnemy				UMETA(DisplayName = "% chance to arc to a nearby enemy"),
 	ESA_DamageShield			UMETA(DisplayName = "While stat is at 1.0, can absorb one attack"),
-	ESA_ManaCostReduction		UMETA(DisplayName = "Reduces mana costs")
-
+	ESA_ManaCostReduction		UMETA(DisplayName = "Reduces mana costs"),
+	ESA_BonusMana				UMETA(DisplayName = "Bonus mana"),
+	ESA_BonusManaPercent		UMETA(DisplayName = "% more mana"),
+	ESA_Last
 };
 
 UENUM(BlueprintType)

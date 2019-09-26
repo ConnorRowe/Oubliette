@@ -127,10 +127,6 @@ public:
 
 	//Gameplay variables
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
-	int32 HealthCurrent;
-	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
-	int32 HealthMax;
-	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
 	bool bIsDead;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
 	bool bInputEnabled;
@@ -153,12 +149,6 @@ public:
 	bool bCanAttackL = true;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	bool bCanAttackR = true;
-	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	float ManaCurrent;
-	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	float manaMax;
-	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	float manaRecharge;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	EHandEnum HandEnumNEW = EHandEnum::HE_Left;
@@ -175,18 +165,23 @@ public:
 	int32 baseInte = 1;
 	int32 baseAgil = 1;
 	int32 baseWisd = 1;
-	int32 baseBonFire = 0;
-	int32 baseBonFrost = 0;
-	int32 baseBonShock = 0;
-	int32 baseBonArcane = 0;
-	int32 baseBonShadow = 0;
-	int32 baseBonUndead = 0;
-	int32 baseBonSlime = 0;
-	int32 baseBonBeast = 0;
-	int32 baseBonXP = 0;
-	int32 baseBonLoot = 0;
+	float baseHealth = 0.0f;
+	float baseMana = 100.0f;
+	float baseManaRecharge = 10.0f;
+
+	//mana stuff
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	float ManaCurrent;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	float ManaMax;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	float ManaRecharge;
 
 	//Actual Working Stats
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
+	int32 HealthCurrent;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
+	int32 HealthMax;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
 	int32 Inte;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
@@ -250,4 +245,10 @@ public:
 	int32 DamageShield;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
 	int32 ManaCostReduction;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonusMana;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 BonusManaPercent;
+
+	int32* GetStat(EStatsEnum Stat);
 };

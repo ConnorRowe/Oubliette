@@ -101,16 +101,18 @@ void AOublietteCharacter::calculateStats()
 	Inte = baseInte;
 	Agil = baseAgil;
 	Wisd = baseWisd;
-	BonFire = baseBonFire;
-	BonFrost = baseBonFire;
-	BonShock = baseBonShock;
-	BonArcane = baseBonArcane;
-	BonShadow = baseBonShadow;
-	BonUndead = baseBonUndead;
-	BonSlime = baseBonSlime;
-	BonBeast = baseBonBeast;
-	BonXP = baseBonXP;
-	BonLoot = baseBonLoot;
+	ManaMax = baseMana;
+	ManaRecharge = baseManaRecharge;
+
+	//Loop through every stat and set to 0
+	for (uint8 i = 0; i < static_cast<uint8>(EStatsEnum::ESA_Last); ++i)
+	{
+		int32* stat = GetStat(static_cast<EStatsEnum>(i));
+		if (stat != nullptr)
+		{
+			*stat = 0;
+		}
+	}
 
 	//Parse items to find stats
 	for (auto& Item : Inventory)
@@ -120,6 +122,7 @@ void AOublietteCharacter::calculateStats()
 			addToStat(Stat.StatType, Stat.StatAmount);
 		}
 	}
+
 }
 
 void AOublietteCharacter::calcBaseDamage()
@@ -203,103 +206,12 @@ FSpellDamageCalc AOublietteCharacter::calcSpellDamage()
 
 void AOublietteCharacter::addToStat(EStatsEnum Stat, float Amount)
 {
-	switch (Stat)
+	int32* stat = GetStat(Stat);
+	int32 roundedAmount = FMath::RoundToInt(Amount);
+	//Ensures the stat is valid
+	if (stat != nullptr)
 	{
-	case EStatsEnum::ESA_Agility:
-		Agil += Amount;
-		break;
-	case EStatsEnum::ESA_BetterLoot:
-		BonLoot += Amount;
-		break;
-	case EStatsEnum::ESA_BonusArcane:
-		BonArcane += Amount;
-		break;
-	case EStatsEnum::ESA_BonusFire:
-		BonFire += Amount;
-		break;
-	case EStatsEnum::ESA_BonusFrost:
-		BonFrost += Amount;
-		break;
-	case EStatsEnum::ESA_BonusShadow:
-		BonShadow += Amount;
-		break;
-	case EStatsEnum::ESA_BonusShock:
-		BonShock += Amount;
-		break;
-	case EStatsEnum::ESA_BonusXP:
-		BonXP += Amount;
-		break;
-	case EStatsEnum::ESA_DmgUndead:
-		BonUndead += Amount;
-		break;
-	case EStatsEnum::ESA_DmgBeasts:
-		BonBeast += Amount;
-		break;
-	case EStatsEnum::ESA_DmgSlime:
-		BonSlime += Amount;
-		break;
-	case EStatsEnum::ESA_Intellect:
-		Inte += Amount;
-		break;
-	case EStatsEnum::ESA_Wisdom:
-		Wisd += Amount;
-		break;
-	case EStatsEnum::ESA_SpawnEye:
-		SpawnEyeOnKill += Amount;
-		break;
-	case EStatsEnum::ESA_MagicSnails:
-		MagicSnails += Amount;
-		break;
-	case EStatsEnum::ESA_ShroomBonus:
-		NiceRats += Amount;
-		break;
-	case EStatsEnum::ESA_NiceRats:
-		ShroomBonus += Amount;
-		break;
-	case EStatsEnum::ESA_IgnoreDmg:
-		IgnoreDmg += Amount;
-		break;
-	case EStatsEnum::ESA_ProjSpeed:
-		ProjSpeed += Amount;
-		break;
-	case EStatsEnum::ESA_SpellPierce:
-		SpellPierce += Amount;
-		break;
-	case EStatsEnum::ESA_DoubleRadius:
-		DoubleRadius += Amount;
-		break;
-	case EStatsEnum::ESA_BonusBurn:
-		BonusBurn += Amount;
-		break;
-	case EStatsEnum::ESA_BonusChill:
-		BonusChill += Amount;
-		break;
-	case EStatsEnum::ESA_BonusStun:
-		BonusStun += Amount;
-		break;
-	case EStatsEnum::ESA_RegenManaChunkOnKill:
-		RegenManaChunkOnKill += Amount;
-		break;
-	case EStatsEnum::ESA_CastSpeed:
-		CastSpeed += Amount;
-		break;
-	case EStatsEnum::ESA_ChannelTickrate:
-		ChannelTickrate += Amount;
-		break;
-	case EStatsEnum::ESA_ChannelRange:
-		ChannelRange += Amount;
-		break;
-	case EStatsEnum::ESA_ArcToEnemy:
-		ArcToEnemy += Amount;
-		break;
-	case EStatsEnum::ESA_DamageShield:
-		DamageShield += Amount;
-		break;
-	case EStatsEnum::ESA_ManaCostReduction:
-		ManaCostReduction += Amount;
-		break;
-	default:
-		break;
+		*stat = *stat + roundedAmount;
 	}
 }
 
@@ -447,5 +359,114 @@ void AOublietteCharacter::RemoveBuffByName(const FName Name)
 
 		//Remove the buff
 		removeBuff(*foundBuff);
+	}
+}
+
+//Returns the stat variable for the given Stat enum
+int32* AOublietteCharacter::GetStat(EStatsEnum Stat)
+{
+	switch (Stat)
+	{
+	case EStatsEnum::ESA_Agility:
+		return &Agil;
+
+	case EStatsEnum::ESA_BetterLoot:
+		return &BonLoot;
+
+	case EStatsEnum::ESA_BonusArcane:
+		return &BonArcane;
+
+	case EStatsEnum::ESA_BonusFire:
+		return &BonFire;
+
+	case EStatsEnum::ESA_BonusFrost:
+		return &BonFrost;
+		
+	case EStatsEnum::ESA_BonusShadow:
+		return &BonShadow;
+
+	case EStatsEnum::ESA_BonusShock:
+		return &BonShock;
+
+	case EStatsEnum::ESA_BonusXP:
+		return &BonXP;
+
+	case EStatsEnum::ESA_DmgUndead:
+		return &BonUndead;
+
+	case EStatsEnum::ESA_DmgBeasts:
+		return &BonBeast;
+
+	case EStatsEnum::ESA_DmgSlime:
+		return &BonSlime;
+
+	case EStatsEnum::ESA_Intellect:
+		return &Inte;
+
+	case EStatsEnum::ESA_Wisdom:
+		return &Wisd;
+
+	case EStatsEnum::ESA_SpawnEye:
+		return &SpawnEyeOnKill;
+
+	case EStatsEnum::ESA_MagicSnails:
+		return &MagicSnails;
+
+	case EStatsEnum::ESA_ShroomBonus:
+		return &NiceRats;
+
+	case EStatsEnum::ESA_NiceRats:
+		return &ShroomBonus;
+
+	case EStatsEnum::ESA_IgnoreDmg:
+		return &IgnoreDmg;
+
+	case EStatsEnum::ESA_ProjSpeed:
+		return &ProjSpeed;
+
+	case EStatsEnum::ESA_SpellPierce:
+		return &SpellPierce;
+
+	case EStatsEnum::ESA_DoubleRadius:
+		return &DoubleRadius;
+
+	case EStatsEnum::ESA_BonusBurn:
+		return &BonusBurn;
+		
+	case EStatsEnum::ESA_BonusChill:
+		return &BonusChill;
+
+	case EStatsEnum::ESA_BonusStun:
+		return &BonusStun;
+
+	case EStatsEnum::ESA_RegenManaChunkOnKill:
+		return &RegenManaChunkOnKill;
+
+	case EStatsEnum::ESA_CastSpeed:
+		return &CastSpeed;
+
+	case EStatsEnum::ESA_ChannelTickrate:
+		return &ChannelTickrate;
+
+	case EStatsEnum::ESA_ChannelRange:
+		return &ChannelRange;
+
+	case EStatsEnum::ESA_ArcToEnemy:
+		return &ArcToEnemy;
+
+	case EStatsEnum::ESA_DamageShield:
+		return &DamageShield;
+
+	case EStatsEnum::ESA_ManaCostReduction:
+		return &ManaCostReduction;
+
+	case EStatsEnum::ESA_BonusMana:
+		return &BonusMana;
+
+	case EStatsEnum::ESA_BonusManaPercent:
+		return &BonusManaPercent;
+
+	default:
+		return nullptr;
 	}
 }
