@@ -85,6 +85,8 @@ enum class EStatsEnum : uint8
 	ESA_ManaCostReduction		UMETA(DisplayName = "Reduces mana costs"),
 	ESA_BonusMana				UMETA(DisplayName = "Bonus mana"),
 	ESA_BonusManaPercent		UMETA(DisplayName = "% more mana"),
+	ESA_ManaRegen				UMETA(DisplayName = "more mana per second"),
+	ESA_ManaRegenPercent		UMETA(DisplayName = "% faster mana regeneration"),
 	ESA_Last
 };
 

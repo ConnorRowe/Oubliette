@@ -30,6 +30,18 @@ void AOublietteCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	updateCurrentBuffs();
+
+	//Regenerate Mana
+	if (ManaCurrent < ManaMax)
+	{
+		ManaCurrent += (baseManaRegen*(1.0f + (float)ManaRegenPercent) + (float)ManaRegen)*DeltaTime;
+	}
+
+	//Clamp Mana
+	if (ManaCurrent > ManaMax)
+	{
+		ManaCurrent = ManaMax;
+	}
 }
 
 // Called to bind functionality to input
@@ -102,7 +114,6 @@ void AOublietteCharacter::calculateStats()
 	Agil = baseAgil;
 	Wisd = baseWisd;
 	ManaMax = baseMana;
-	ManaRecharge = baseManaRecharge;
 
 	//Loop through every stat and set to 0
 	for (uint8 i = 0; i < static_cast<uint8>(EStatsEnum::ESA_Last); ++i)
@@ -122,6 +133,9 @@ void AOublietteCharacter::calculateStats()
 			addToStat(Stat.StatType, Stat.StatAmount);
 		}
 	}
+
+	//Calculate Mana --- 1 extra mana per intellect
+	ManaMax += Inte;
 
 }
 
@@ -202,6 +216,57 @@ FSpellDamageCalc AOublietteCharacter::calcSpellDamage()
 	}
 
 	return spellDmg;
+}
+
+bool AOublietteCharacter::TrySpendMana(EHandEnum Hand)
+{
+	float manaCost = 0.0f;
+	bool isSuccess = false;
+
+	//Select a mana cost depending on the spell type
+	if (Hand == EHandEnum::HE_Left)
+	{
+		manaCost = 25.0f;
+	}
+	else if (Hand == EHandEnum::HE_Right)
+	{
+		switch (ActiveSpellRNew.SpellFormation)
+		{
+		case ESpellFormsEnum::SFE_Channel:
+		{
+			manaCost = 5.0f;
+			break;
+		}
+		case ESpellFormsEnum::SFE_HitScan:
+		{
+			manaCost = 10.0f;
+			break;
+		}
+		case ESpellFormsEnum::SFE_Projectile:
+		{
+			manaCost = 10.0f;
+			break;
+		}
+		}
+	}
+
+	//Apply mana cost reduction stat
+	manaCost *= (1.0f - ManaCostReduction);
+
+	//Reduce mana
+	ManaCurrent -= manaCost;
+
+	//Check if all mana has been spent, spell is only successful if mana has not gone negative
+	if (ManaCurrent < 0.0f)
+	{
+		ManaCurrent = 0.0f;
+	}
+	else
+	{
+		isSuccess = true;
+	}
+
+	return isSuccess;
 }
 
 void AOublietteCharacter::addToStat(EStatsEnum Stat, float Amount)
@@ -465,6 +530,12 @@ int32* AOublietteCharacter::GetStat(EStatsEnum Stat)
 
 	case EStatsEnum::ESA_BonusManaPercent:
 		return &BonusManaPercent;
+
+	case EStatsEnum::ESA_ManaRegen:
+		return &ManaRegen;
+
+	case EStatsEnum::ESA_ManaRegenPercent:
+		return &ManaRegenPercent;
 
 	default:
 		return nullptr;

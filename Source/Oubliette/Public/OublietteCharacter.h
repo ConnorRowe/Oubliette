@@ -109,6 +109,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
 	FSpellDamageCalc calcSpellDamage();
 
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+	bool TrySpendMana(EHandEnum Hand);
+
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
 	void addToStat(EStatsEnum Stat, float Amount);
 
@@ -167,15 +170,13 @@ public:
 	int32 baseWisd = 1;
 	float baseHealth = 0.0f;
 	float baseMana = 100.0f;
-	float baseManaRecharge = 10.0f;
+	float baseManaRegen = 10.0f;
 
 	//mana stuff
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	float ManaCurrent;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	float ManaMax;
-	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	float ManaRecharge;
 
 	//Actual Working Stats
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
@@ -249,6 +250,10 @@ public:
 	int32 BonusMana;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
 	int32 BonusManaPercent;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 ManaRegen;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
+	int32 ManaRegenPercent;
 
 	int32* GetStat(EStatsEnum Stat);
 };
