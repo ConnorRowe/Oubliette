@@ -300,7 +300,7 @@ void AOublietteCharacter::applyBuff(const FCurrentBuff & buff)
 
 	CurrentBuffs.Add(buff);
 
-	BuffApplied(buff.Stat, buff.Name, buff.StatAmount, buff.StartTime, buff.Duration, buff.IsHidden, buff.Icon);
+	BuffApplied(buff.Stat, buff.Name, buff.StatAmount, buff.StartTime, buff.Duration, buff.IsHidden < 1.0, buff.Icon);
 
 	FString bufflog;
 	bufflog = "Buff Applied: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.StatAmount) + ", for " + FString::SanitizeFloat(buff.Duration) + " seconds";
