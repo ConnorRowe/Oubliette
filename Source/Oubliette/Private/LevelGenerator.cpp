@@ -67,6 +67,7 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 		BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
 		BP_Trapdoor = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Trapdoor.BP_Trapdoor'"));
 		BP_Char = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Character/BP_Oubliette_Character.BP_Oubliette_Character'"));
+		BP_Enemy_MeleeWalker = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_MeleeWalker.BP_Enemy_MeleeWalker'"));
 	}
 }
 
@@ -126,7 +127,13 @@ void ALevelGenerator::GenerateObjects(AOublietteRoom* targetRoom)
 		}
 		case EObjectTypeEnum::OTE_Enemy_Standard:
 		{
-			w->SpawnActor<AActor>(BP_Slime, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
+			bool randbool = FMath::RandBool();
+
+			UClass* stdEnemyBP = BP_Slime;
+
+			if (randbool) { stdEnemyBP = BP_Enemy_MeleeWalker; }
+
+			w->SpawnActor<AActor>(stdEnemyBP, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
 
 			break;
 		}

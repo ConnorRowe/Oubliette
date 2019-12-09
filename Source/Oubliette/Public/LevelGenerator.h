@@ -152,6 +152,7 @@ private:
 	UClass* BP_Slime;
 	UClass* BP_Slime_Fire;
 	UClass* BP_Slime_Giant;
+	UClass* BP_Enemy_MeleeWalker;
 	UClass* BP_Trapdoor;
 
 };
