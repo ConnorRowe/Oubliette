@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Selectable.h"
+#include "Interactable.h"
 #include "OublietteTrapdoor.generated.h"
 
 UCLASS()
-class OUBLIETTE_API AOublietteTrapdoor : public AActor
+class OUBLIETTE_API AOublietteTrapdoor : public AActor, public ISelectable, public IInteractable
 {
 	GENERATED_BODY()
 	
@@ -23,4 +25,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	//Selectable interface
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		bool UpdateSelection(bool IsSelectedNew);
+	virtual bool UpdateSelection_Implementation(bool IsSelectedNew) override;
+
+	//Interactable interface
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		void Interact();
+	virtual void Interact_Implementation() override;
 };

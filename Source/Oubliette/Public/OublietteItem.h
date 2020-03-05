@@ -5,10 +5,12 @@
 #include "CoreMinimal.h"
 #include "Oubliette.h"
 #include "GameFramework/Actor.h"
+#include "Selectable.h"
+#include "Interactable.h"
 #include "OublietteItem.generated.h"
 
 UCLASS()
-class OUBLIETTE_API AOublietteItem : public AActor
+class OUBLIETTE_API AOublietteItem : public AActor, public ISelectable, public IInteractable
 {
 	GENERATED_BODY()
 	
@@ -26,4 +28,14 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "Item")
 	FItemStruct ItemData;
+
+	//Selectable interface
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		bool UpdateSelection(bool IsSelectedNew);
+	virtual bool UpdateSelection_Implementation(bool IsSelectedNew) override;
+
+	//Interactable interface
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		void Interact();
+	virtual void Interact_Implementation() override;
 };

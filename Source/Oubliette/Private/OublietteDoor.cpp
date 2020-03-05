@@ -4,10 +4,14 @@
 #include "OublietteDoor.h"
 
 // Sets default values
-AOublietteDoor::AOublietteDoor()
+AOublietteDoor::AOublietteDoor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	DoorMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("DoorMesh"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorMeshObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_DoorNew.SM_DoorNew'"));
+	DoorMesh->SetupAttachment(RootComponent);
+	DoorMesh->SetStaticMesh(Cast<UStaticMesh>(DoorMeshObj.Object));
+	DoorMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 160.0f));
 
 }
 
@@ -23,5 +27,24 @@ void AOublietteDoor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AOublietteDoor::Init(const FRotator newRotation, const FVector targetOffset)
+{
+	if (linkedDoor != nullptr)
+	{
+		targetLocation = linkedDoor->GetActorLocation() + targetOffset;
+	}
+
+	SetActorRotation(newRotation);
+}
+
+bool AOublietteDoor::UpdateSelection_Implementation(bool IsSelectedNew)
+{
+	return true;
+}
+
+void AOublietteDoor::Interact_Implementation()
+{
 }
 

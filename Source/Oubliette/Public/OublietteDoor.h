@@ -4,16 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CoreUObject/Public/Uobject/ConstructorHelpers.h"
+#include "Engine/Classes/Components/StaticMeshComponent.h"
+#include "Selectable.h"
+#include "Interactable.h"
 #include "OublietteDoor.generated.h"
 
 UCLASS()
-class OUBLIETTE_API AOublietteDoor : public AActor
+class OUBLIETTE_API AOublietteDoor : public AActor, public ISelectable, public IInteractable
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AOublietteDoor();
+
+public:
+	AOublietteDoor(const FObjectInitializer& ObjectInitializer);
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,4 +26,23 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void Init(const FRotator newRotation, const FVector targetOffset);
+
+	UPROPERTY(BlueprintReadOnly)
+		UStaticMeshComponent* DoorMesh;
+
+	UPROPERTY(BlueprintReadWrite)
+		FVector targetLocation = FVector(0.0f);
+
+	UPROPERTY(BlueprintReadWrite)
+		AOublietteDoor* linkedDoor;
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool UpdateSelection(bool IsSelectedNew);
+		virtual bool UpdateSelection_Implementation(bool IsSelectedNew) override;
+
+	//Interactable interface
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Interact();
+		virtual void Interact_Implementation() override;
 };

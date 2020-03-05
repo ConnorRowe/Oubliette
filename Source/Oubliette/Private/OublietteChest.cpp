@@ -25,3 +25,12 @@ void AOublietteChest::Tick(float DeltaTime)
 
 }
 
+bool AOublietteChest::UpdateSelection_Implementation(bool IsSelectedNew)
+{
+	return false;
+}
+
+void AOublietteChest::Interact_Implementation()
+{
+}
+

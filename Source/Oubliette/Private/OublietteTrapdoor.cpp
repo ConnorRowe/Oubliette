@@ -25,3 +25,12 @@ void AOublietteTrapdoor::Tick(float DeltaTime)
 
 }
 
+bool AOublietteTrapdoor::UpdateSelection_Implementation(bool IsSelectedNew)
+{
+	return false;
+}
+
+void AOublietteTrapdoor::Interact_Implementation()
+{
+}
+

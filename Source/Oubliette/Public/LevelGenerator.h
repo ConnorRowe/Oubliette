@@ -20,6 +20,10 @@
 #include "Engine/World.h"
 #include "CoreUObject/Public/Uobject/ConstructorHelpers.h"
 #include "EngineUtils.h"
+#include <EngineGlobals.h>
+#include <Runtime/Engine/Classes/Engine/Engine.h>
+#include <random>
+#include "OublietteDoor.h"
 #include "LevelGenerator.generated.h"
 
 // Enum of different spawnable objects for rooms
@@ -33,64 +37,32 @@ enum class EObjectTypeEnum : uint8
 	OTE_Trapdoor
 };
 
-struct FObjectDataStruct
-{
-	EObjectTypeEnum ObjectType;
-	FVector Location;
-	FRotator Rotation;
-
-	FObjectDataStruct() {};
-
-	//Constructor
-	FObjectDataStruct(EObjectTypeEnum init_ObjectType, FVector init_Location, FRotator init_Rotation)
-	{
-		ObjectType = init_ObjectType;
-		Location = init_Location;
-		Rotation = init_Rotation;
-	}
-};
-
-struct FRoomGenDataStruct
-{
-	int32 roomType;
-	TArray<FObjectDataStruct> objects;
-
-	FRoomGenDataStruct() {};
-
-	//Constructor
-	FRoomGenDataStruct(int32 init_roomType, TArray<FObjectDataStruct> init_objects)
-	{
-		roomType = init_roomType;
-		objects = init_objects;
-	}
-};
-
-USTRUCT(BlueprintType)
-struct FRoomData
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY(BlueprintReadWrite, Category = "Room Data")
-	int32 xPos = NULL;
-	UPROPERTY(BlueprintReadWrite, Category = "Room Data")
-	int32 yPos = NULL;
-	UPROPERTY(BlueprintReadWrite, Category = "Room Data")
-	int32 roomType = 0;
-};
-
+//Represents a start and end point (x, y)
 USTRUCT(BluePrintType)
-struct FWallData
+struct FTriEdge
 {
 	GENERATED_USTRUCT_BODY()
 
-	UPROPERTY(BlueprintReadWrite, Category = "Wall Data")
-	int32 xPos = 0;
-	UPROPERTY(BlueprintReadWrite, Category = "Wall Data")
-	int32 yPos = 0;
-	UPROPERTY(BlueprintReadWrite, Category = "Wall Data")
-	int32 wallType = 0;
-	UPROPERTY(BlueprintReadWrite, Category = "Wall Data")
-	int32 zRot = 0;
+	UPROPERTY(BlueprintReadWrite)
+	FVector2D start;
+	UPROPERTY(BlueprintReadWrite)
+	FVector2D end;
+
+	//override '==' operator so that TArray.AddUnique() works.
+	FORCEINLINE bool operator==(const FTriEdge& Other) const
+	{
+		return (start == Other.start && end == Other.end);
+	}
+
+	FTriEdge()
+	{
+		start = FVector2D(0.0f); end = FVector2D(0.0f);
+	}
+
+	FTriEdge(FVector2D Start, FVector2D End)
+	{
+		start = Start; end = End;
+	}
 };
 
 UCLASS()
@@ -106,25 +78,51 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallDoorBP);
-	TArray<FRoomData> generateRooms();
-	TArray<FWallData> generateWalls();
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void spawnLevel();
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void nextLevel();
-
-	UPROPERTY(BlueprintReadOnly, Category = "Level Generation")
-	TArray<FRoomData> roomData;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Room")
-	UStaticMesh* wallMesh;
-
-	void spawnRegWall(const FVector Location, const float ZRot);
-
 	AOublietteCharacter* charRef;
 
+	//generates 24 randomly sized and positioned rooms stored as FVector4 (x pos, y pos, width, height)
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	TArray<FVector4> generateBaseRooms();
+
+	//checks all given rooms for collisions, if one occurs then the room is moved away from the room it is colliding with - returns false if no collisions occur
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	bool checkRoomsCollision(const TArray<FVector4> roomsIn, TArray<FVector4>& roomsOut);
+
+	//clamps room positions and sizes to the grid cell size
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void clampRooms(const TArray<FVector4> roomsIn, TArray<FVector4>& roomsOut);
+
+	//filters rooms to be of a similar size within a range
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void findMainRooms(const TArray<FVector4> roomsIn, TArray<int>& mainRoomIDsOut);
+
+	//performs Delaunay triangulation using Delaunator by delfrrr which can be found at https://github.com/delfrrr/delaunator-cpp
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void triangulateRooms(const TArray<FVector4> roomsIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut);
+
+	//generates a minimal spanning tree using Prim's algorithm
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void minimalSpanningTree(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut);
+
+	//generates corridors between rooms using L corners if needed - unused for gameplay currently
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void generateCorridors(const TArray<FTriEdge> edgesIn, TArray<FTriEdge>& edgesOut);
+
+	//spawns objects like enemies and chests into the rooms
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void populateRooms(const TArray<FVector4> roomsIn);
+
+	//spawns doors to connect all the rooms using the minimal spanning tree
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn);
+
+	//adds a static mesh instance for each room's 4 walls
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void createWallMeshInstances(const TArray<FVector4> roomsIn);
+
+	//iterates through all actors used for level generation and deletes them all
+	UFUNCTION(BlueprintCallable, Category = "Level Generation")
+	void cleanUpActors();
 
 private:
 	UWorld* w;
@@ -132,27 +130,22 @@ private:
 	UGameInstanceOubliette* gi;
 	APlayerController* conRef;
 
-	int32 roomIDs[50][50];
-	int32 xSize;
-	int32 ySize;
-	int32 numRooms;
-	int32 roomSize;
-	int32 roomMargins;
-	UClass* roomBP;
-	UClass* wallDoorBP;
 	UClass* BP_Char;
 
 	//Room object stuff
-	TArray<FRoomGenDataStruct> RoomSpawns_Standard;
-	TArray<FRoomGenDataStruct> RoomSpawns_Treasure;
-	TArray<FRoomGenDataStruct> RoomSpawns_Boss;
-	void GenerateObjects(AOublietteRoom* targetRoom);
 	UDestructibleMesh* TableDMesh;
+	UStaticMesh* OneByOneByTenMesh;
 	UClass* BP_Chest;
 	UClass* BP_Slime;
 	UClass* BP_Slime_Fire;
 	UClass* BP_Slime_Giant;
 	UClass* BP_Enemy_MeleeWalker;
 	UClass* BP_Trapdoor;
+	UClass* BP_Door;
 
+	//Helper functions
+
+	bool AABBVec4(const FVector4 roomA, const FVector4 roomB);
+	FVector2D getRandomPointInEllipse(float width, float height);
+	UClass* getRandomEnemyBP();
 };

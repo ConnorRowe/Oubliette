@@ -2,6 +2,10 @@
 
 #include "LevelGenerator.h"
 #include "CoreMinimal.h"
+#include <delaunator.hpp>
+
+#define CELLSIZE 160.0f
+#define HALFCELLSIZE 80.0f
 
 // Sets default values
 ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
@@ -13,515 +17,25 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 	// Must set root component;
 	RootComponent = WallMeshInstances;
 
-	// Room object generation stuff
-	// rooms are 3200^2 units in size
-	TArray<FObjectDataStruct> tempRoomData;
-
-	/// Standard Rooms
-
-	// two enemies, 1 table
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Ranged, FVector(-600.0f, 300.0f, 0.0f), FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Standard, FVector(-600.0f, -300.0f, 0.0f), FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table, FVector(600.0f, -600.0f, 0.0f), FRotator(0.0f, 180.0f, 0.0f)));
-	RoomSpawns_Standard.Add(FRoomGenDataStruct(1, tempRoomData));
-	tempRoomData.Empty();
-
-	// 2 tables
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table, FVector(600.0f, -600.0f, 0.0f), FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Table, FVector(-600.0f, 600.0f, 0.0f), FRotator()));
-	RoomSpawns_Standard.Add(FRoomGenDataStruct(1, tempRoomData));
-	tempRoomData.Empty();
-
-	/// Treasure Rooms
-
-	// single middle chest
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest, FVector(0.0f), FRotator()));
-	RoomSpawns_Treasure.Add(FRoomGenDataStruct(2, tempRoomData));
-	tempRoomData.Empty();
-
-	// double chest
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest, FVector(0.0f, 400.0f, 0.0f), FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Chest, FVector(0.0f, -400.0f, 0.0f), FRotator()));
-	RoomSpawns_Treasure.Add(FRoomGenDataStruct(2, tempRoomData));
-	tempRoomData.Empty();
-
-	/// Boss Rooms
-
-	// giant slime
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Enemy_Large, FVector(0.0f), FRotator()));
-	tempRoomData.Add(FObjectDataStruct(EObjectTypeEnum::OTE_Trapdoor, FVector(0.0f), FRotator()));
-	RoomSpawns_Boss.Add(FRoomGenDataStruct(3, tempRoomData));
-	tempRoomData.Empty();
-
 	/// Asset Loading
 	// Mesh loading
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> TableDMeshObj(TEXT("/Game/Meshes/Static/Destructible/SM_Table_DM.SM_Table_DM"));
 	TableDMesh = Cast<UDestructibleMesh>(TableDMeshObj.Object);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> OneByOneByTenObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_1x1x10_Cuboid.SM_1x1x10_Cuboid'"));
+	OneByOneByTenMesh = Cast<UStaticMesh>(OneByOneByTenObj.Object);
 
-	//Prevents unhandled exception crash (probably from UE-71147)
-	if (GetWorld())
-	{
-		BP_Slime = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime.BP_Enemy_Slime'"));
-		BP_Chest = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Items/BP_Chest.BP_Chest'"));
-		BP_Slime_Fire = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire'"));
-		BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
-		BP_Trapdoor = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Trapdoor.BP_Trapdoor'"));
-		BP_Char = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Character/BP_Oubliette_Character.BP_Oubliette_Character'"));
-		BP_Enemy_MeleeWalker = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_MeleeWalker.BP_Enemy_MeleeWalker'"));
-	}
+	// Blueprint loading
+	BP_Slime = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime.BP_Enemy_Slime'"));
+	BP_Chest = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Items/BP_Chest.BP_Chest'"));
+	BP_Slime_Fire = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Fire.BP_Enemy_Slime_Fire'"));
+	BP_Slime_Giant = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime_Giant.BP_Enemy_Slime_Giant'"));
+	BP_Trapdoor = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Trapdoor.BP_Trapdoor'"));
+	BP_Char = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Character/BP_Oubliette_Character.BP_Oubliette_Character'"));
+	BP_Enemy_MeleeWalker = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_MeleeWalker.BP_Enemy_MeleeWalker'"));
+	BP_Door = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Door.BP_Door'"));
 }
 
-void ALevelGenerator::GenerateObjects(AOublietteRoom* targetRoom)
-{
-	TArray<FRoomGenDataStruct> RoomSpawns;
-
-	switch (targetRoom->roomType)
-	{
-	case 1:
-		// Standard room
-		RoomSpawns = RoomSpawns_Standard;
-		break;
-	case 2:
-		// Treasure room
-		RoomSpawns = RoomSpawns_Treasure;
-		break;
-	case 3:
-		// Boss room
-		RoomSpawns = RoomSpawns_Boss;
-		break;
-	default:
-		break;
-	}
-
-	int32 maxSize = RoomSpawns.Num() - 1;
-	int32 roomindex = FMath::RandRange(0, maxSize);
-	TArray<FObjectDataStruct> RoomData = RoomSpawns[roomindex].objects;
-
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-	for (int i = 0; i < RoomData.Num(); ++i)
-	{
-		switch (RoomData[i].ObjectType)
-		{
-
-		case EObjectTypeEnum::OTE_Table:
-		{
-			UDestructibleComponent* TableComp = NewObject<UDestructibleComponent>(targetRoom, UDestructibleComponent::StaticClass(), FName("TableDestructibleMesh" + i));
-			TableComp->RegisterComponent();
-			TableComp->SetDestructibleMesh(TableDMesh);
-			TableComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-			TableComp->SetSimulatePhysics(true);
-			TableComp->SetCanEverAffectNavigation(true);
-			TableComp->SetWorldLocationAndRotation((targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation);
-			TableComp->SetWorldScale3D(FVector(1.0f));
-
-			break;
-		}
-		case EObjectTypeEnum::OTE_Chest:
-		{
-			w->SpawnActor<AActor>(BP_Chest, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
-
-			break;
-		}
-		case EObjectTypeEnum::OTE_Enemy_Standard:
-		{
-			bool randbool = FMath::RandBool();
-
-			UClass* stdEnemyBP = BP_Slime;
-
-			if (randbool) { stdEnemyBP = BP_Enemy_MeleeWalker; }
-
-			w->SpawnActor<AActor>(stdEnemyBP, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
-
-			break;
-		}
-		case EObjectTypeEnum::OTE_Enemy_Ranged:
-		{
-			w->SpawnActor<AActor>(BP_Slime_Fire, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
-
-			break;
-		}
-		case EObjectTypeEnum::OTE_Enemy_Large:
-		{
-			w->SpawnActor<AActor>(BP_Slime_Giant, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
-
-			break;
-		}
-		case EObjectTypeEnum::OTE_Trapdoor:
-		{
-			w->SpawnActor<AActor>(BP_Trapdoor, (targetRoom->GetActorLocation() + RoomData[i].Location), RoomData[i].Rotation, SpawnParams);
-
-			break;
-		}
-		default:
-			break;
-		}
-	}
-}
-
-// Called when the game starts or when spawned
-void ALevelGenerator::BeginPlay()
-{
-	//Reference to world
-	w = GetWorld();
-	//Reference to the game mode
-	gm = (AGameModeOubliette*)w->GetAuthGameMode();
-	//Reference to the game instance
-	gi = (UGameInstanceOubliette*)w->GetGameInstance();
-	//Reference to player controller
-	conRef = UGameplayStatics::GetPlayerController(w, 0);
-
-	FActorSpawnParameters spawnParams;
-	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-	WallMeshInstances->SetStaticMesh(wallMesh);
-
-	//Spawn character in world
-	charRef = w->SpawnActor<AOublietteCharacter>(BP_Char, FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
-
-	//Destroy old pawn
-	conRef->GetPawn()->Destroy();
-	//Possess new pawn
-	conRef->Possess(charRef);
-	//Set character reference in game instance
-	gi->charRef = charRef;
-	gi->ApplySkillStatsAndBuffs();
-	gm->charRef = charRef;
-
-	Super::BeginPlay();
-
-}
-
-void ALevelGenerator::spawnRegWall(const FVector Location, const float ZRot)
-{
-	// Set up transform for the wall
-	FTransform wallTransform;
-	wallTransform.SetLocation(Location);
-	wallTransform.SetRotation(FQuat(FRotator(0.0f, ZRot, 0.0f)));
-
-	// Spawn wall instance
-	WallMeshInstances->AddInstance(wallTransform);
-}
-
-TArray<FRoomData> ALevelGenerator::generateRooms()
-{
-	int32 seed = (int32)(FDateTime::Now().GetTicks() % INT_MAX);
-	FMath::RandInit(seed);
-	
-	int32 treasureRooms = FMath::RandRange(1, 2);
-	int32 bossRooms = 1;
-
-	TArray<int32> requiredRooms;
-
-	roomData.Empty();
-	requiredRooms.Empty();
-
-	//Prevent empty level bug
-	while (roomData.Num() < numRooms)
-	{
-		roomData.Empty();
-
-		//Add treasure rooms
-		for (int i = 0; i < treasureRooms; ++i)
-		{
-			requiredRooms.Add(2);
-		}
-		//Add boss rooms
-		for (int i = 0; i < bossRooms; ++i)
-		{
-			requiredRooms.Add(3);
-		}
-
-		//Parse array, setting all room IDs to 0 (empty)
-		for (int x = 0; x < 49; ++x)
-		{
-			for (int y = 0; y < 49; ++y)
-			{
-				roomIDs[x][y] = 0;
-			}
-		}
-
-		//Pick random starting point in array
-		int xPos = FMath::RandRange(0, xSize);
-		int yPos = FMath::RandRange(0, ySize);
-
-		//Directions
-		int xD, yD = 0;
-
-		int tries = 0;
-
-		for (int r = 1; r < numRooms; ++r)
-		{
-			bool roomOK = false;
-			roomIDs[xPos][yPos] = 1;
-
-			while (!roomOK)
-			{
-				++tries;
-				//Picking a new position for next room
-				int newDir = FMath::RandRange(0, 3);
-				switch (newDir)
-				{
-				case 0:
-					xD = 1; yD = 0;
-					break;
-				case 1:
-					xD = 0; yD = 1;
-					break;
-				case 2:
-					xD = -1; yD = 0;
-					break;
-				case 3:
-					xD = 0; yD = -1;
-					break;
-				default:
-					xD = 0; yD = 0;
-					break;
-				}
-
-				//Room space exists and is empty
-				//if (roomIDs[xPos + xD][yPos + yD] != NULL && roomIDs[xPos + xD][yPos + yD] == 0)
-				if (roomIDs[xPos + xD][yPos + yD] == 0 && (xPos + xD) < xSize && (yPos + yD) < ySize && (xPos + xD) >= 0 && (yPos + yD) >= 0)
-				{
-					xPos += xD; yPos += yD;
-
-					//Set room ID
-					roomIDs[xPos][yPos] = 1;
-
-					roomOK = true;
-					tries = 0;
-				}
-
-				if (tries > 1000)
-				{
-					//AKA somethings wrong and should probably skip to avoid crash
-					roomOK = true;
-					tries = 0;
-				}
-			}
-		}
-
-		//Parse the roomIDs array one final time and convert to a TArray that blueprints understand then return it
-		FRoomData tempData;
-		int r = 0;
-
-		for (int xR = 0; xR < xSize; ++xR)
-		{
-			for (int yR = 0; yR < ySize; ++yR)
-			{
-				if (roomIDs[xR][yR] == 1)
-				{
-					//Don't let the first room be special - Sorry, first room!
-					if (r > 0)
-					{
-						bool madeSpecialRoom = false;
-
-						// Just make a room special randomly sometimes to spread them out through the level instead of leaving until last;
-						if (FMath::RandBool() && (requiredRooms.Num() > 0))
-						{
-							tempData.roomType = requiredRooms.Pop(true);
-							madeSpecialRoom = true;
-						}// Otherwise make it a normal room
-						else
-						{
-							tempData.roomType = 1;
-						}
-
-						//Make sure that there are enough rooms left for required rooms to be generated - basically last resort
-						if ((numRooms - r <= requiredRooms.Num()) && (!madeSpecialRoom) && (requiredRooms.Num() > 0))
-						{
-							tempData.roomType = requiredRooms.Pop(true);
-						}
-
-					}
-					else
-					{
-						tempData.roomType = 1;
-					}
-
-					tempData.xPos = xR;
-					tempData.yPos = yR;
-
-					roomData.Emplace(tempData);
-					++r;
-				}
-			}
-		}
-	}
-
-	return roomData;
-}
-
-TArray<FWallData> ALevelGenerator::generateWalls()
-{
-	int32 xWallIDs[51][51];
-	int32 xWallRots[51][51];
-	int32 yWallIDs[51][51];
-	int32 yWallRots[51][51];
-
-	for (int x = 0; x < xSize; ++x)
-	{
-		for (int y = 0; y < ySize; ++y)
-		{
-			//If room exists
-			if (roomIDs[x][y] > 0)
-			{
-				//Room is completely left / right
-				if (x == 0 || x == xSize)
-				{
-					xWallIDs[x][y] = 1;
-					xWallRots[x][y] = 0;
-				}
-				//Room is completly top / bottom
-				if (y == 1 || y == ySize)
-				{
-					yWallIDs[x + 1][y] = 1;
-					yWallRots[x + 1][y] = 90;
-				}
-
-				//There is a room to the right - needs a door
-				if (roomIDs[x + 1][y] != 0)
-				{
-					xWallIDs[x + 1][y] = 2;
-					xWallRots[x + 1][y] = 0;
-				}
-
-
-				//There is NOT a room to the right - needs a normal wall
-				if (roomIDs[x + 1][y] == 0)
-				{
-					xWallIDs[x + 1][y] = 1;
-					xWallRots[x + 1][y] = 0;
-				}
-				//There is NOT a room to the left - needs a normal wall
-				if (roomIDs[x - 1][y] == 0)
-				{
-					xWallIDs[x][y] = 1;
-					xWallRots[x][y] = 0;
-				}
-
-				//There is a room to the bottom - needs a door
-				if (roomIDs[x][y + 1] != 0)
-				{
-					yWallIDs[x][y + 1] = 2;
-					yWallRots[x][y + 1] = 90;
-				}
-				//There is NOT a room to the bottom - needs a normal wall
-				if (roomIDs[x][y + 1] == 0)
-				{
-					yWallIDs[x][y + 1] = 1;
-					yWallRots[x][y + 1] = 90;
-				}
-				//There is NOT a room to the top - needs a normal wall
-				if (roomIDs[x][y - 1] == 0)
-				{
-					yWallIDs[x][y] = 1;
-					yWallRots[x][y] = 90;
-				}
-			}
-		}
-	}
-
-	TArray<FWallData> wallData;
-	FWallData tempData;
-
-	//Parse the wallIDs array to and convert to a TArray that blueprints understand then return it
-	for (int x = 0; x < xSize + 1; ++x)
-	{
-		for (int y = 0; y < ySize + 1; ++y)
-		{
-			if (xWallIDs[x][y] == 1 || xWallIDs[x][y] == 2)
-			{
-				tempData.wallType = xWallIDs[x][y];
-				tempData.xPos = x;
-				tempData.yPos = y;
-				tempData.zRot = xWallRots[x][y];
-
-				wallData.Emplace(tempData);
-			}
-
-			if (yWallIDs[x][y] == 1 || yWallIDs[x][y] == 2)
-			{
-				tempData.wallType = yWallIDs[x][y];
-				tempData.xPos = x;
-				tempData.yPos = y;
-				tempData.zRot = yWallRots[x][y];
-
-				wallData.Emplace(tempData);
-			}
-		}
-	}
-
-	return wallData;
-}
-
-//From the rooms generated from the generateLevels function, this spawns all the necessary objects into the world
-void ALevelGenerator::spawnLevel()
-{
-	//Starting location for room
-	const float roomStart = roomSize + roomMargins;
-	FActorSpawnParameters spawnParams;
-
-	//Generate the room data
-	TArray<FRoomData> rooms = generateRooms();
-
-	//Spawn all room actors
-	for (int i = 0; i < rooms.Num(); ++i)
-	{
-		//Calculate a new room location depending on the current rooms x and y positions
-		FVector roomLoc = FVector(roomStart * rooms[i].xPos, roomStart * rooms[i].yPos, 0.0f) - FVector((roomStart * xSize) / 2);
-		roomLoc.Z = 0.0f;
-
-		//Spawn the room actor and add it to the allRooms array in the game mode
-		AOublietteRoom* newRoom = w->SpawnActor<AOublietteRoom>(roomBP, roomLoc, FRotator(0.0f), spawnParams);
-		gm->allRooms.Emplace(newRoom);
-		newRoom->roomType = rooms[i].roomType;
-
-		//If it is the first room, spawn the character, possess it, and set reference in the game instance
-		if (i == 0)
-		{
-			//Set character's position to the room
-			charRef->SetActorLocation(roomLoc + FVector(0.0f, 0.0f, 100.0f));
-		}
-		else
-		{
-			//Only generate stuff if it is not the first room
-			GenerateObjects(newRoom);
-		}
-	}
-
-	//Generate walls from the rooms data
-	TArray<FWallData> newWalls = generateWalls();
-
-	//Walls should always be spawned, no matter the collision
-	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	//Spawn all wall and door actors
-	for (int i = 0; i < newWalls.Num(); ++i)
-	{
-		//If the wall type is 0 then no wall should be spawned in that location
-		if (newWalls[i].wallType > 0)
-		{
-			FVector wallLoc = FVector(roomStart * newWalls[i].xPos, roomStart * newWalls[i].yPos, 0.0f) - FVector((roomStart * xSize) / 2);
-			wallLoc.Z = 0;
-
-			if (newWalls[i].zRot > 0)
-				wallLoc.Y -= roomStart / 2;
-			else
-				wallLoc.X -= roomStart / 2;
-
-			if (newWalls[i].wallType == 1)
-				spawnRegWall(wallLoc, (float)newWalls[i].zRot);
-			else if (newWalls[i].wallType == 2)
-				gm->allWallsDoors.Emplace(w->SpawnActor<AActor>(wallDoorBP, wallLoc, FRotator(0.0f, (float)newWalls[i].zRot, 0.0f), spawnParams));
-
-		}
-	}
-}
-
-void ALevelGenerator::nextLevel()
+void ALevelGenerator::cleanUpActors()
 {
 	//Destroy all the level objects
 	for (TActorIterator<AOublietteDoor> DoorItr(w); DoorItr; ++DoorItr)
@@ -548,39 +62,522 @@ void ALevelGenerator::nextLevel()
 	{
 		w->DestroyActor(*TrapDItr);
 	}
-	WallMeshInstances->ClearInstances();
-	gm->allWallsDoors.Empty();
-	//Spawn new level
-	spawnLevel();
+	for (TActorIterator<AOublietteDoor> DoorItr(w); DoorItr; ++DoorItr)
+	{
+		w->DestroyActor(*DoorItr);
+	}
 }
 
-//Sets all the variables needed to generate and spawn a level
-void ALevelGenerator::setGenInfo(const int32 XSize, const int32 YSize, const int32 NumRooms, const float RoomSize, const float RoomMargins, UClass* RoomBP, UClass* WallDoorBP)
+// Called when the game starts or when spawned
+void ALevelGenerator::BeginPlay()
 {
-	if (XSize >= 50)
-	{
-		xSize = 50;
-	}
-	else
-		xSize = XSize;
+	//Reference to world
+	w = GetWorld();
+	//Reference to the game mode
+	gm = (AGameModeOubliette*)w->GetAuthGameMode();
+	//Reference to the game instance
+	gi = (UGameInstanceOubliette*)w->GetGameInstance();
+	//Reference to player controller
+	conRef = UGameplayStatics::GetPlayerController(w, 0);
 
-	if (YSize >= 50)
-	{
-		ySize = 50;
-	}
-	else
-		ySize = YSize;
+	FActorSpawnParameters spawnParams;
+	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	if (NumRooms >= 2500)
-	{
-		numRooms = 2500;
-	}
-	else
-		numRooms = NumRooms;
+	WallMeshInstances->SetStaticMesh(OneByOneByTenMesh);
 
-	roomSize = RoomSize;
-	roomMargins = RoomMargins;
-	roomBP = RoomBP;
-	wallDoorBP = WallDoorBP;
+	//Spawn character in world
+	charRef = w->SpawnActor<AOublietteCharacter>(BP_Char, FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f), spawnParams);
+
+	//Destroy old pawn
+	conRef->GetPawn()->Destroy();
+	//Possess new pawn
+	conRef->Possess(charRef);
+	//Set character reference in game instance
+	gi->charRef = charRef;
+	gi->ApplySkillStatsAndBuffs();
+	gm->charRef = charRef;
+
+	Super::BeginPlay();
+
 }
 
+TArray<FVector4> ALevelGenerator::generateBaseRooms()
+{
+	TArray<FVector4> newRooms;
+
+	// random device class instance, source of 'true' randomness for initializing random seed
+	std::random_device rd;
+
+	// Mersenne twister PRNG, initialized with seed from previous random device instance
+	std::mt19937 gen(rd());
+
+	float mean = 0.8f;
+	float stddev = 0.95f;
+
+	// instance of class std::normal_distribution with specific mean and stddev
+	std::normal_distribution<float> d(mean, stddev);
+
+	float sample;
+	for (int i = 0; i < 24; ++i)
+	{
+		// get random number with normal distribution using gen as random source
+		sample = d(gen);
+
+		FVector2D point = getRandomPointInEllipse(6400.0f, 480.0f);
+
+		float width = FMath::Lerp(960.0f, 1280.0f, FMath::Abs(d(gen)));
+
+		FVector2D size = FVector2D(FMath::Lerp(width * .75, width * 1.25, FMath::Abs(d(gen))), width);
+
+		newRooms.Add(FVector4(point, size));
+	}
+
+	return newRooms;
+}
+
+bool ALevelGenerator::checkRoomsCollision(const TArray<FVector4> roomsIn, TArray<FVector4>& roomsOut)
+{
+	bool hasCollided = false;
+	roomsOut = roomsIn;
+
+	for (int i = 0; i < roomsOut.Num(); ++i)
+	{
+		for (FVector roomB : roomsOut)
+		{
+			if (AABBVec4(roomsOut[i], roomB))
+			{
+				//move i away from j
+				FVector2D translateVec = FVector2D(roomsOut[i].X - roomB.X, roomsOut[i].Y - roomB.Y);
+				translateVec.Normalize();
+				translateVec *= 256.0f;
+				roomsOut[i].X += translateVec.X;
+				roomsOut[i].Y += translateVec.Y;
+
+				if (!translateVec.Equals(FVector2D(0.0f)))
+				{
+					hasCollided = true;
+				}
+			}
+		}
+	}
+
+	return hasCollided;
+}
+
+void ALevelGenerator::clampRooms(const TArray<FVector4> roomsIn, TArray<FVector4>& roomsOut)
+{
+	roomsOut = TArray<FVector4>();
+
+	for (int i = 0; i < roomsIn.Num(); ++i)
+	{
+		roomsOut.Add(FVector4(FMath::RoundToFloat(roomsIn[i].X / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsIn[i].Y / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsIn[i].Z / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsIn[i].W / CELLSIZE) * CELLSIZE));
+	}
+}
+
+void ALevelGenerator::findMainRooms(const TArray<FVector4> roomsIn, TArray<int>& mainRoomIDsOut)
+{
+	float meanArea = 0.0f;
+
+	for (FVector4 room : roomsIn)
+	{
+		meanArea += (room.Z * room.W);
+	}
+
+	meanArea /= roomsIn.Num();
+
+	float mainThreshhold = 1.0f;
+
+	for (int i = 0; i < roomsIn.Num(); ++i)
+	{
+		if (roomsIn[i].Z * roomsIn[i].W >= meanArea * mainThreshhold)
+		{
+			mainRoomIDsOut.Add(i);
+		}
+	}
+}
+
+void ALevelGenerator::triangulateRooms(const TArray<FVector4> roomsIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut)
+{
+	std::vector<double> coords = std::vector<double>();
+	TArray<FVector2D> roomVerts = TArray<FVector2D>();
+	indexTreeOut = TArray<FVector2D>(); // x = id of vertex, y = id of connection
+
+	for (FVector4 room : roomsIn)
+	{
+		coords.insert(coords.end(), (double)room.X + (room.Z / 2));
+		coords.insert(coords.end(), (double)room.Y + (room.W / 2));
+
+		roomVerts.Add(FVector2D(room.X + (room.Z / 2), room.Y + (room.W / 2)));
+	}
+
+	delaunator::Delaunator d(coords);
+
+	for (std::size_t i = 0; i < d.triangles.size(); i += 3) {
+
+		FVector2D pointA = FVector2D(d.coords[2 * d.triangles[i]], d.coords[2 * d.triangles[i] + 1]);
+		FVector2D pointB = FVector2D(d.coords[2 * d.triangles[i + 1]], d.coords[2 * d.triangles[i + 1] + 1]);
+		FVector2D pointC = FVector2D(d.coords[2 * d.triangles[i + 2]], d.coords[2 * d.triangles[i + 2] + 1]);
+
+		edgesOut.AddUnique(FTriEdge(pointA, pointB));
+		edgesOut.AddUnique(FTriEdge(pointB, pointC));
+		edgesOut.AddUnique(FTriEdge(pointC, pointA));
+
+
+		// Get all indices in rooms array and their connections
+
+		int indexA = roomVerts.Find(pointA);
+		int indexB = roomVerts.Find(pointB);
+		int indexC = roomVerts.Find(pointC);
+
+		indexTreeOut.Add(FVector2D(indexA, indexB));
+		indexTreeOut.Add(FVector2D(indexB, indexC));
+		indexTreeOut.Add(FVector2D(indexC, indexA));
+	}
+}
+
+void ALevelGenerator::minimalSpanningTree(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut)
+{
+	bool hasCompleted = false; //if the function has visited every node
+
+	indexTreeOut = TArray<FVector2D>();
+	edgesOut = TArray<FTriEdge>();
+	TArray<int> allUniqueNodes = TArray<int>();
+	for (FVector2D edge : indexTreeIn)
+	{
+		allUniqueNodes.AddUnique(edge.X);
+	}
+
+	TArray<int> visitedNodes = TArray<int>();
+	//Choose any arbitrary node as root node
+	visitedNodes.Add(indexTreeIn[FMath::RandRange(0, indexTreeIn.Num() - 1)].X);
+
+	while (!hasCompleted)
+	{
+		TArray<FVector2D> outgoingEdges = TArray<FVector2D>();
+
+		//Find outgoing edges of all visited nodes
+		for (int node : visitedNodes)
+		{
+			for (FVector2D edge : indexTreeIn)
+			{
+				if (edge.X == (float)node)
+				{
+					outgoingEdges.Add(edge);
+				}
+			}
+		}
+
+		FVector2D selectedEdge; bool foundNewEdge = false;
+		TArray<float> edgeDistances = TArray<float>();
+
+		//Find the distance of all edges
+		for (FVector2D edge : outgoingEdges)
+		{
+			FVector2D start = FVector2D(roomsIn[edge.X].X + (roomsIn[edge.X].Z / 2), roomsIn[edge.X].Y + (roomsIn[edge.X].W / 2));
+			FVector2D end = FVector2D(roomsIn[edge.Y].X + (roomsIn[edge.Y].Z / 2), roomsIn[edge.Y].Y + (roomsIn[edge.Y].W / 2));
+
+			edgeDistances.Add(FVector2D::Distance(start, end));
+		}
+
+		float edgeLimit = 0;	//used to add a lower limit to the shortest edge search if the smallest one leads to an already visited node
+		//Find the shortest edge that hasn't been visited
+		while (!foundNewEdge)
+		{
+			float shortestEdgeIndex = 0;
+			float shortestEdge = std::numeric_limits<float>::max();
+
+			for (int i = 0; i < edgeDistances.Num(); ++i)
+			{
+				if (edgeDistances[i] < shortestEdge && edgeDistances[i] > edgeLimit)
+				{
+					shortestEdge = edgeDistances[i];
+					shortestEdgeIndex = i;
+				}
+			}
+
+			//Check if the node the selected edge leads to has already been visited
+			selectedEdge = outgoingEdges[shortestEdgeIndex];
+			if (!visitedNodes.Contains(FMath::FloorToInt(selectedEdge.Y)))
+			{
+				foundNewEdge = true;
+			}
+			else
+			{
+				edgeLimit = shortestEdge;
+			}
+		}
+
+		//Now an edge has been successfully found, add it to the indexTreeOut array and set the node id as visited
+		visitedNodes.Add(selectedEdge.Y);
+		indexTreeOut.Add(selectedEdge);
+
+		//Once all nodes have been visited, stop searching
+		if (visitedNodes.Num() == allUniqueNodes.Num())
+		{
+			hasCompleted = true;
+		}
+	}
+
+	//build edgesOut from the minimal spanning edge node indices
+	for (FVector2D edgeIndices : indexTreeOut)
+	{
+		FVector2D start = FVector2D(roomsIn[edgeIndices.X].X + (roomsIn[edgeIndices.X].Z / 2), roomsIn[edgeIndices.X].Y + (roomsIn[edgeIndices.X].W / 2));
+		FVector2D end = FVector2D(roomsIn[edgeIndices.Y].X + (roomsIn[edgeIndices.Y].Z / 2), roomsIn[edgeIndices.Y].Y + (roomsIn[edgeIndices.Y].W / 2));
+
+		edgesOut.Add(FTriEdge(start, end));
+	}
+}
+
+void ALevelGenerator::generateCorridors(const TArray<FTriEdge> edgesIn, TArray<FTriEdge>& edgesOut)
+{
+	edgesOut = TArray<FTriEdge>();
+
+	for (FTriEdge edge : edgesIn)
+	{
+		if (FMath::IsNearlyEqual(edge.start.X, edge.end.X, 20))
+		{
+			edgesOut.Add(FTriEdge(edge.start, FVector2D(edge.start.X, edge.end.Y)));
+		}
+		else if (FMath::IsNearlyEqual(edge.start.Y, edge.end.Y, 20))
+		{
+			edgesOut.Add(FTriEdge(edge.start, FVector2D(edge.end.X, edge.start.Y)));
+		}
+		else
+		{
+			if (edge.start.X - edge.end.X < edge.start.Y - edge.end.Y)
+			{
+				edgesOut.Add(FTriEdge(edge.start, FVector2D(edge.start.X, edge.end.Y)));
+				edgesOut.Add(FTriEdge(FVector2D(edge.start.X, edge.end.Y), edge.end));
+
+			}
+			else
+			{
+				edgesOut.Add(FTriEdge(edge.start, FVector2D(edge.end.X, edge.start.Y)));
+				edgesOut.Add(FTriEdge(FVector2D(edge.end.X, edge.start.Y), edge.end));
+			}
+		}
+	}
+}
+
+void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn)
+{
+	float specialRoomChance;
+
+	//Special rooms: 0 = chest room, 1 = boss room, 2 = starter room
+	TArray<int> specialRooms = TArray<int>({ 2, 0, 1 });
+	if (FMath::RandBool()) { specialRooms.Add(0); }
+
+	for (int i = 0; i < roomsIn.Num(); ++i)
+	{
+		//The chance to spawn a special room increases as the number of remaining rooms decreases
+		specialRoomChance = (i + specialRooms.Num()) / roomsIn.Num();
+
+		const FVector4* room = &roomsIn[i];
+
+		int xCells = room->Z / CELLSIZE;
+		int yCells = room->W / CELLSIZE;
+
+		int maxEnemies = FMath::FloorToInt((xCells * yCells) * 0.08f);
+
+		std::vector< std::vector<bool>> cellGrid(xCells, std::vector<bool>(yCells));
+		for (int x = 0; x < xCells; ++x)
+		{
+			for (int y = 0; y < yCells; ++y)
+			{
+				cellGrid[x][y] = false;
+			}
+		}
+
+		int enemiesNum = FMath::RandRange(1 + (maxEnemies / 4), maxEnemies);
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+		
+		int specialRoomType = -1;
+		//Try generate special room stuff
+		if (FMath::FRand() <= specialRoomChance)
+		{
+			int specialRoomIndex = FMath::RandRange(0, specialRooms.Num() - 1);
+
+			specialRoomType = specialRooms[specialRoomIndex];
+
+			//Midpoint of the room
+			FVector midCell = FVector(room->X + ((xCells / 2) * CELLSIZE) + HALFCELLSIZE, room->Y + ((yCells / 2) * CELLSIZE) + HALFCELLSIZE, 1.0f);
+
+			switch (specialRoomType)
+			{
+				//Chest room
+			case 0:
+				w->SpawnActor<AActor>(BP_Chest, midCell, FRotator(0.0f), SpawnParams);
+				break;
+				//Boss room
+			case 1:
+				w->SpawnActor<AActor>(BP_Trapdoor, midCell, FRotator(0.0f), SpawnParams);
+				w->SpawnActor<AActor>(BP_Slime_Giant, midCell, FRotator(0.0f), SpawnParams);
+				break;
+				//Starter room
+			case 2:
+				charRef->SetActorLocation(midCell + FVector(0.0f, 0.0f, 100.0f));
+				break;
+			default:
+				break;
+			}
+
+			//Remove the special room from the array so it is only generated once
+			specialRooms.RemoveAt(specialRoomIndex);
+		}
+
+		//Only spawn enemies if the room is not a starter room
+		if (specialRoomType != 2)
+		{
+			for (int e = 0; e < enemiesNum; ++e)
+			{
+				//pick random point in the grid
+				int randX = FMath::RandRange(0, xCells - 1);
+				int randY = FMath::RandRange(0, yCells - 1);
+
+				if (!cellGrid[randX][randY])
+				{
+					float xPos = room->X + (randX * CELLSIZE) + HALFCELLSIZE;
+					float yPos = room->Y + (randY * CELLSIZE) + HALFCELLSIZE;
+
+					w->SpawnActor<AActor>(getRandomEnemyBP(), FVector(xPos, yPos, 20.0f), FRotator(), SpawnParams);
+				}
+
+				cellGrid[randX][randY] = true;
+			}
+		}
+	}
+}
+
+void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn)
+{
+	TArray<FVector> doorsPos = TArray<FVector>();
+
+	for (FVector2D relationship : indexTreeIn)
+	{
+		FVector4 roomA = roomsIn[FMath::FloorToInt(relationship.X)];
+		FVector4 roomB = roomsIn[FMath::FloorToInt(relationship.Y)];
+
+		FVector2D roomDifference = FVector2D(roomA.X + roomA.Z / 2, roomA.Y + roomA.W / 2) - FVector2D(roomB.X + roomB.Z / 2, roomB.Y + roomB.W / 2);
+
+		float angle = FMath::Atan2(roomDifference.X, roomDifference.Y);
+		// 0 = East; 1 = North; 2 = West; 3 = South
+		int ABDir = (FMath::RoundToInt(8 * angle / (2 * PI) + 8) % 8) / 2;
+		int BADir = (ABDir + 2) % 4;
+		
+		float doorZRotA = 0.0f;
+		float doorZRotB = 0.0f;
+
+		FVector doorPosA = FVector();
+		FVector doorPosB = FVector();
+		FVector offsetA = FVector();
+		FVector offsetB = FVector();
+
+		switch (ABDir)
+		{
+		case 0:
+			doorPosA = FVector(roomA.X, roomA.Y + FMath::FRandRange(CELLSIZE, roomA.W - CELLSIZE), 0.0f);
+			doorPosB = FVector(roomB.X + roomB.Z, roomB.Y + FMath::FRandRange(CELLSIZE, roomB.W - CELLSIZE), 0.0f);
+			doorZRotA = 0.0f;
+			doorZRotB = 180.0f;
+			offsetA = FVector(-HALFCELLSIZE, 0.0f, 0.0f);
+			offsetB = FVector(HALFCELLSIZE, 0.0f, 0.0f);
+			break;
+		case 1:
+			doorPosA = FVector(roomA.X + FMath::FRandRange(CELLSIZE, roomA.Z - CELLSIZE), roomA.Y, 0.0f);
+			doorPosB = FVector(roomB.X + FMath::FRandRange(CELLSIZE, roomB.Z - CELLSIZE), roomB.Y + roomB.W, 0.0f);
+			doorZRotA = -90.0f;
+			doorZRotB = 90.0f;
+			offsetA = FVector(0.0f, -HALFCELLSIZE, 0.0f);
+			offsetB = FVector(0.0f, HALFCELLSIZE, 0.0f);
+			break;
+		case 2:
+			doorPosA = FVector(roomA.X + roomA.Z, roomA.Y + FMath::FRandRange(CELLSIZE, roomA.W - CELLSIZE), 0.0f);
+			doorPosB = FVector(roomB.X, roomB.Y + FMath::FRandRange(CELLSIZE, roomB.W - CELLSIZE), 0.0f);
+			doorZRotA = 180.0f;
+			doorZRotB = 0.0f;
+			offsetA = FVector(HALFCELLSIZE, 0.0f, 0.0f);
+			offsetB = FVector(-HALFCELLSIZE, 0.0f, 0.0f);
+			break;
+		case 3:
+			doorPosA = FVector(roomA.X + FMath::FRandRange(CELLSIZE, roomA.Z - CELLSIZE), roomA.Y + roomA.W, 0.0f);
+			doorPosB = FVector(roomB.X + FMath::FRandRange(CELLSIZE, roomB.Z - CELLSIZE), roomB.Y, 0.0f);
+			doorZRotA = 90.0f;
+			doorZRotB = -90.0f;
+			offsetA = FVector(0.0f, HALFCELLSIZE, 0.0f);
+			offsetB = FVector(0.0f, -HALFCELLSIZE, 0.0f);
+			break;
+		}
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AOublietteDoor* doorA = w->SpawnActor<AOublietteDoor>(BP_Door, doorPosA, FRotator(0.0f), SpawnParams);
+		AOublietteDoor* doorB = w->SpawnActor<AOublietteDoor>(BP_Door, doorPosB, FRotator(0.0f), SpawnParams);
+
+		doorA->linkedDoor = doorB;
+		doorB->linkedDoor = doorA;
+
+		doorA->Init(FRotator(0.0f, doorZRotA, 0.0f), offsetA);
+		doorB->Init(FRotator(0.0f, doorZRotB, 0.0f), offsetB);
+
+		doorsPos.Append({ doorPosA, doorPosB });
+	}
+}
+
+void ALevelGenerator::createWallMeshInstances(const TArray<FVector4> roomsIn)
+{
+	WallMeshInstances->ClearInstances();
+
+	for (FVector4 room : roomsIn)
+	{
+		//north wall
+		WallMeshInstances->AddInstanceWorldSpace(FTransform(FRotator(0.0f), FVector(room.X + (room.Z / 2), room.Y, 200.0f), FVector(room.Z, 1.0f, 40.0f)));
+		//south wall
+		WallMeshInstances->AddInstanceWorldSpace(FTransform(FRotator(0.0f), FVector(room.X + (room.Z / 2), room.Y + room.W, 200.0f), FVector(room.Z, 1.0f, 40.0f)));
+		//east wall
+		WallMeshInstances->AddInstanceWorldSpace(FTransform(FRotator(0.0f), FVector(room.X, room.Y + (room.W / 2), 200.0f), FVector(1.0f, room.W, 40.0f)));
+		//west wall
+		WallMeshInstances->AddInstanceWorldSpace(FTransform(FRotator(0.0f), FVector(room.X + room.Z, room.Y + (room.W / 2), 200.0f), FVector(1.0f, room.W, 40.0f)));
+	}
+}
+
+bool ALevelGenerator::AABBVec4(const FVector4 roomA, const FVector4 roomB)
+{
+	const float extraSpace = 720.0f;
+
+	// Collision x-axis?
+	bool collisionX = roomA.X + roomA.Z + extraSpace >= roomB.X &&
+		roomB.X + roomB.Z + extraSpace >= roomA.X;
+	// Collision y-axis?
+	bool collisionY = roomA.Y + roomA.W + extraSpace >= roomB.Y &&
+		roomB.Y + roomB.W + extraSpace >= roomA.Y;
+	// Collision only if on both axes
+	return collisionX && collisionY;
+}
+
+FVector2D ALevelGenerator::getRandomPointInEllipse(float width, float height)
+{
+	float t = 2.0f * PI * FMath::FRand();
+	float u = FMath::FRand() + FMath::FRand();
+	float r;
+
+	if (u > 1.0f)
+	{
+		r = 2.0f - u;
+	}
+	else
+	{
+		r = u;
+	}
+
+	return FVector2D(width * r * FMath::Cos(t) / 2.0f, height * r * FMath::Cos(t) / 2.0f);
+}
+
+UClass* ALevelGenerator::getRandomEnemyBP()
+{
+	TArray<UClass*> enemies = TArray<UClass*>({ BP_Slime, BP_Slime_Fire, BP_Enemy_MeleeWalker });
+
+	return enemies[FMath::RandRange(0, enemies.Num() - 1)];
+}

@@ -509,5 +509,5 @@ static FORCEINLINE UClass* LoadBPFromPath(FString Path)
 
 	UBlueprint* bpObj = Cast<UBlueprint>(loadObj);
 
-	return CastChecked<UClass>(bpObj->GeneratedClass);
+	return Cast<UClass>(bpObj->GeneratedClass);
 }
