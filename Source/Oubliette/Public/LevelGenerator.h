@@ -70,7 +70,7 @@ class OUBLIETTE_API ALevelGenerator : public AActor
 {
 	GENERATED_UCLASS_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Level Generation")
+	UPROPERTY(BlueprintReadWrite, Category = "Level Generation")
 	class UInstancedStaticMeshComponent* WallMeshInstances;
 
 protected:
