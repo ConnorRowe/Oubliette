@@ -6,6 +6,7 @@
 
 #define CELLSIZE 160.0f
 #define HALFCELLSIZE 80.0f
+#define DOORDEPTH 7.5f
 
 // Sets default values
 ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
@@ -477,34 +478,34 @@ void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray
 		switch (ABDir)
 		{
 		case 0:
-			doorPosA = FVector(roomA.X, roomA.Y + FMath::FRandRange(CELLSIZE, roomA.W - CELLSIZE), 0.0f);
-			doorPosB = FVector(roomB.X + roomB.Z, roomB.Y + FMath::FRandRange(CELLSIZE, roomB.W - CELLSIZE), 0.0f);
+			doorPosA = FVector(roomA.X + DOORDEPTH, roomA.Y + FMath::FRandRange(CELLSIZE, roomA.W - CELLSIZE), 0.0f);
+			doorPosB = FVector(roomB.X + roomB.Z - DOORDEPTH, roomB.Y + FMath::FRandRange(CELLSIZE, roomB.W - CELLSIZE), 0.0f);
 			doorZRotA = 0.0f;
 			doorZRotB = 180.0f;
 			offsetA = FVector(-HALFCELLSIZE, 0.0f, 0.0f);
 			offsetB = FVector(HALFCELLSIZE, 0.0f, 0.0f);
 			break;
 		case 1:
-			doorPosA = FVector(roomA.X + FMath::FRandRange(CELLSIZE, roomA.Z - CELLSIZE), roomA.Y, 0.0f);
-			doorPosB = FVector(roomB.X + FMath::FRandRange(CELLSIZE, roomB.Z - CELLSIZE), roomB.Y + roomB.W, 0.0f);
-			doorZRotA = -90.0f;
-			doorZRotB = 90.0f;
+			doorPosA = FVector(roomA.X + FMath::FRandRange(CELLSIZE, roomA.Z - CELLSIZE), roomA.Y + DOORDEPTH, 0.0f);
+			doorPosB = FVector(roomB.X + FMath::FRandRange(CELLSIZE, roomB.Z - CELLSIZE), roomB.Y + roomB.W - DOORDEPTH, 0.0f);
+			doorZRotA = 90.0f;
+			doorZRotB = -90.0f;
 			offsetA = FVector(0.0f, -HALFCELLSIZE, 0.0f);
 			offsetB = FVector(0.0f, HALFCELLSIZE, 0.0f);
 			break;
 		case 2:
-			doorPosA = FVector(roomA.X + roomA.Z, roomA.Y + FMath::FRandRange(CELLSIZE, roomA.W - CELLSIZE), 0.0f);
-			doorPosB = FVector(roomB.X, roomB.Y + FMath::FRandRange(CELLSIZE, roomB.W - CELLSIZE), 0.0f);
+			doorPosA = FVector(roomA.X + roomA.Z - DOORDEPTH, roomA.Y + FMath::FRandRange(CELLSIZE, roomA.W - CELLSIZE), 0.0f);
+			doorPosB = FVector(roomB.X + DOORDEPTH, roomB.Y + FMath::FRandRange(CELLSIZE, roomB.W - CELLSIZE), 0.0f);
 			doorZRotA = 180.0f;
 			doorZRotB = 0.0f;
 			offsetA = FVector(HALFCELLSIZE, 0.0f, 0.0f);
 			offsetB = FVector(-HALFCELLSIZE, 0.0f, 0.0f);
 			break;
 		case 3:
-			doorPosA = FVector(roomA.X + FMath::FRandRange(CELLSIZE, roomA.Z - CELLSIZE), roomA.Y + roomA.W, 0.0f);
-			doorPosB = FVector(roomB.X + FMath::FRandRange(CELLSIZE, roomB.Z - CELLSIZE), roomB.Y, 0.0f);
-			doorZRotA = 90.0f;
-			doorZRotB = -90.0f;
+			doorPosA = FVector(roomA.X + FMath::FRandRange(CELLSIZE, roomA.Z - CELLSIZE), roomA.Y + roomA.W - DOORDEPTH, 0.0f);
+			doorPosB = FVector(roomB.X + FMath::FRandRange(CELLSIZE, roomB.Z - CELLSIZE), roomB.Y + DOORDEPTH, 0.0f);
+			doorZRotA = -90.0f;
+			doorZRotB = 90.0f;
 			offsetA = FVector(0.0f, HALFCELLSIZE, 0.0f);
 			offsetB = FVector(0.0f, -HALFCELLSIZE, 0.0f);
 			break;

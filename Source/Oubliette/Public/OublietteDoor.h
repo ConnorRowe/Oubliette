@@ -28,7 +28,7 @@ public:
 
 	void Init(const FRotator newRotation, const FVector targetOffset);
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadWrite)
 		UStaticMeshComponent* DoorMesh;
 
 	UPROPERTY(BlueprintReadWrite)

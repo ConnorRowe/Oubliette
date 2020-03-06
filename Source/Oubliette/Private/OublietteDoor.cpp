@@ -7,11 +7,14 @@
 AOublietteDoor::AOublietteDoor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	USceneComponent* origin = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("Root"));
+	this->SetRootComponent(origin);
+
 	DoorMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("DoorMesh"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorMeshObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_DoorNew.SM_DoorNew'"));
-	DoorMesh->SetupAttachment(RootComponent);
+	DoorMesh->SetupAttachment(origin);
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorMeshObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_Portal.SM_Portal'"));
 	DoorMesh->SetStaticMesh(Cast<UStaticMesh>(DoorMeshObj.Object));
-	DoorMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 160.0f));
 
 }
 
@@ -36,7 +39,8 @@ void AOublietteDoor::Init(const FRotator newRotation, const FVector targetOffset
 		targetLocation = linkedDoor->GetActorLocation() + targetOffset;
 	}
 
-	SetActorRotation(newRotation);
+	this->SetActorRotation(newRotation);
+
 }
 
 bool AOublietteDoor::UpdateSelection_Implementation(bool IsSelectedNew)
