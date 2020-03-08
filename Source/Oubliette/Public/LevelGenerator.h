@@ -110,11 +110,11 @@ public:
 
 	//spawns objects like enemies and chests into the rooms
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void populateRooms(const TArray<FVector4> roomsIn);
+	void populateRooms(const TArray<FVector4> roomsIn, TArray<ERoomTypeEnum>& roomTypesOut);
 
 	//spawns doors to connect all the rooms using the minimal spanning tree
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn);
+	void generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, const TArray<ERoomTypeEnum> roomTypesIn);
 
 	//adds a static mesh instance for each room's 4 walls
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")

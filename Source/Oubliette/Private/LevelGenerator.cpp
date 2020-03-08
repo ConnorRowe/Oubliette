@@ -360,13 +360,13 @@ void ALevelGenerator::generateCorridors(const TArray<FTriEdge> edgesIn, TArray<F
 	}
 }
 
-void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn)
+void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn, TArray<ERoomTypeEnum>& roomTypesOut)
 {
 	float specialRoomChance;
 
 	//Special rooms: 0 = chest room, 1 = boss room, 2 = starter room
-	TArray<int> specialRooms = TArray<int>({ 2, 0, 1 });
-	if (FMath::RandBool()) { specialRooms.Add(0); }
+	TArray<ERoomTypeEnum> specialRooms = TArray<ERoomTypeEnum>({ ERoomTypeEnum::ERT_Starting, ERoomTypeEnum::ERT_Boss, ERoomTypeEnum::ERT_Treasure });
+	if (FMath::RandBool()) { specialRooms.Add(ERoomTypeEnum::ERT_Treasure); }
 
 	for (int i = 0; i < roomsIn.Num(); ++i)
 	{
@@ -394,7 +394,7 @@ void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn)
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		
-		int specialRoomType = -1;
+		ERoomTypeEnum specialRoomType = ERoomTypeEnum::ERT_Standard;
 		//Try generate special room stuff
 		if (FMath::FRand() <= specialRoomChance)
 		{
@@ -408,16 +408,16 @@ void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn)
 			switch (specialRoomType)
 			{
 				//Chest room
-			case 0:
+			case ERoomTypeEnum::ERT_Treasure:
 				w->SpawnActor<AActor>(BP_Chest, midCell, FRotator(0.0f), SpawnParams);
 				break;
 				//Boss room
-			case 1:
+			case ERoomTypeEnum::ERT_Boss:
 				w->SpawnActor<AActor>(BP_Trapdoor, midCell, FRotator(0.0f), SpawnParams);
 				w->SpawnActor<AActor>(BP_Slime_Giant, midCell, FRotator(0.0f), SpawnParams);
 				break;
 				//Starter room
-			case 2:
+			case ERoomTypeEnum::ERT_Starting:
 				charRef->SetActorLocation(midCell + FVector(0.0f, 0.0f, 100.0f));
 				break;
 			default:
@@ -428,8 +428,10 @@ void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn)
 			specialRooms.RemoveAt(specialRoomIndex);
 		}
 
+		roomTypesOut.Add(specialRoomType);
+
 		//Only spawn enemies if the room is not a starter room
-		if (specialRoomType != 2)
+		if (specialRoomType != ERoomTypeEnum::ERT_Starting)
 		{
 			for (int e = 0; e < enemiesNum; ++e)
 			{
@@ -451,7 +453,7 @@ void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn)
 	}
 }
 
-void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn)
+void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, const TArray<ERoomTypeEnum> roomTypesIn)
 {
 	TArray<FVector> doorsPos = TArray<FVector>();
 
@@ -516,6 +518,9 @@ void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray
 
 		AOublietteDoor* doorA = w->SpawnActor<AOublietteDoor>(BP_Door, doorPosA, FRotator(0.0f), SpawnParams);
 		AOublietteDoor* doorB = w->SpawnActor<AOublietteDoor>(BP_Door, doorPosB, FRotator(0.0f), SpawnParams);
+
+		doorA->RoomType = roomTypesIn[FMath::FloorToInt(relationship.X)];
+		doorB->RoomType = roomTypesIn[FMath::FloorToInt(relationship.Y)];
 
 		doorA->linkedDoor = doorB;
 		doorB->linkedDoor = doorA;

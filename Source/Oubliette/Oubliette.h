@@ -151,6 +151,15 @@ enum class ESortMethodEnum : uint8
 	ESME_DateTime		UMETA(DisplayName = "DateTime")
 };
 
+// Enum of different room types
+UENUM(BlueprintType)
+enum class ERoomTypeEnum : uint8
+{
+	ERT_Starting		UMETA(DisplayName = "Starting"),
+	ERT_Standard		UMETA(DisplayName = "Standard"),
+	ERT_Treasure		UMETA(DisplayName = "Treasure"),
+	ERT_Boss			UMETA(DisplayName = "Boss")
+};
 
 #pragma endregion ENUMS
 

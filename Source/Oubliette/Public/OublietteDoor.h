@@ -8,6 +8,7 @@
 #include "Engine/Classes/Components/StaticMeshComponent.h"
 #include "Selectable.h"
 #include "Interactable.h"
+#include "Oubliette.h"
 #include "OublietteDoor.generated.h"
 
 UCLASS()
@@ -26,7 +27,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void Init(const FRotator newRotation, const FVector targetOffset);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+		void Init(const FRotator newRotation, const FVector targetOffset);
 
 	UPROPERTY(BlueprintReadWrite)
 		UStaticMeshComponent* DoorMesh;
@@ -35,7 +37,13 @@ public:
 		FVector targetLocation = FVector(0.0f);
 
 	UPROPERTY(BlueprintReadWrite)
-		AOublietteDoor* linkedDoor;
+		AOublietteDoor* linkedDoor;	
+	
+	UPROPERTY(BlueprintReadWrite)
+		ERoomTypeEnum RoomType;
+
+	UPROPERTY(BlueprintReadWrite)
+		FVector DoorColour;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	bool UpdateSelection(bool IsSelectedNew);

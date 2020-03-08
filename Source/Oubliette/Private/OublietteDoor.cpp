@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "OublietteDoor.h"
 
 // Sets default values
@@ -32,15 +31,33 @@ void AOublietteDoor::Tick(float DeltaTime)
 
 }
 
-void AOublietteDoor::Init(const FRotator newRotation, const FVector targetOffset)
+void AOublietteDoor::Init_Implementation(const FRotator newRotation, const FVector targetOffset)
 {
+	FName paramName = FName(TEXT("GlowColour"));
+	FVector doorColour = FVector();
+
 	if (linkedDoor != nullptr)
 	{
 		targetLocation = linkedDoor->GetActorLocation() + targetOffset;
+		
+		switch (linkedDoor->RoomType)
+		{
+		case ERoomTypeEnum::ERT_Boss:
+			doorColour = FVector(1.0f, 0.0f, 0.0f);
+			break;
+		case ERoomTypeEnum::ERT_Treasure:
+			doorColour = FVector(1.0f, 0.866667f, 0.0f);
+			break;
+		default:
+			doorColour = FVector(0.850001f, 0.0f, 1.0f);
+			break;
+		}
 	}
 
 	this->SetActorRotation(newRotation);
-
+	this->DoorColour = doorColour;
+	
+	DoorMesh->SetVectorParameterValueOnMaterials(paramName, doorColour * 3.0f);
 }
 
 bool AOublietteDoor::UpdateSelection_Implementation(bool IsSelectedNew)
