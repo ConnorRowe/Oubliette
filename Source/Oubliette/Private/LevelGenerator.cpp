@@ -25,6 +25,10 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> OneByOneByTenObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_1x1x10_Cuboid.SM_1x1x10_Cuboid'"));
 	OneByOneByTenMesh = Cast<UStaticMesh>(OneByOneByTenObj.Object);
 
+	// Material loading
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMatObj(TEXT("Material'/Game/Materials/M_Wall.M_Wall'"));
+	WallMeshInstances->SetMaterial(0, Cast<UMaterialInterface>(WallMatObj.Object));
+
 	// Blueprint loading
 	BP_Slime = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_Slime.BP_Enemy_Slime'"));
 	BP_Chest = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Items/BP_Chest.BP_Chest'"));
@@ -34,9 +38,10 @@ ALevelGenerator::ALevelGenerator(const FObjectInitializer& ObjectInitializer)
 	BP_Char = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/Character/BP_Oubliette_Character.BP_Oubliette_Character'"));
 	BP_Enemy_MeleeWalker = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/AI/Enemies/BP_Enemy_MeleeWalker.BP_Enemy_MeleeWalker'"));
 	BP_Door = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Door.BP_Door'"));
+	BP_Room = LoadBPFromPath(TEXT("Blueprint'/Game/Blueprint/DungeonGen/BP_Room.BP_Room'"));
 }
 
-void ALevelGenerator::cleanUpActors()
+void ALevelGenerator::cleanUpActors() const
 {
 	//Destroy all the level objects
 	for (TActorIterator<AOublietteDoor> DoorItr(w); DoorItr; ++DoorItr)
@@ -67,6 +72,56 @@ void ALevelGenerator::cleanUpActors()
 	{
 		w->DestroyActor(*DoorItr);
 	}
+}
+
+void ALevelGenerator::generateLevel() const
+{
+	WallMeshInstances->ClearInstances();
+
+	cleanUpActors();
+
+	TArray<FVector4> baseRooms = generateBaseRooms();
+
+	TArray<FTriEdge> TriEdges, MinSpanEdges, CorridorEdges = TArray<FTriEdge>();
+
+	bool canRunCollisionTest = true;
+	while (canRunCollisionTest)
+	{
+		canRunCollisionTest = checkRoomsCollision(baseRooms);
+	}
+
+	clampRooms(baseRooms);
+
+	TArray<int32> mainRoomIDs = TArray<int32>();
+	findMainRooms(baseRooms, mainRoomIDs);
+
+	TArray<FVector4> mainRooms = TArray<FVector4>();
+	for (int i = 0; i < mainRoomIDs.Num(); ++i)
+	{
+		mainRooms.Add(baseRooms[i]);
+	}
+
+	TArray<FVector2D> IndexTree = TArray<FVector2D>();
+	triangulateRooms(mainRooms, TriEdges, IndexTree);
+	TArray<FVector2D> MinSpanTree = TArray<FVector2D>();
+	minimalSpanningTree(mainRooms, IndexTree, MinSpanEdges, MinSpanTree);
+
+	generateCorridors(MinSpanEdges, CorridorEdges);
+
+	for (FVector4 room : mainRooms)
+	{
+		AOublietteRoom* roomActor = w->SpawnActor<AOublietteRoom>(BP_Room, FVector(room.X + (room.Z / 2), room.Y + (room.W / 2), -5.0f), FRotator(0.0f));
+
+		roomActor->FloorMesh->SetWorldScale3D(FVector(room.Z, room.W, 1.0f));
+		roomActor->RoomBoxVolume->SetBoxExtent(FVector(room.Z, room.W, 100.0f));
+	}
+
+	createWallMeshInstances(mainRooms);
+
+	TArray<ERoomTypeEnum> roomTypes = TArray<ERoomTypeEnum>();
+	populateRooms(mainRooms, roomTypes);
+
+	generateDoors(mainRooms, MinSpanTree, roomTypes);
 }
 
 // Called when the game starts or when spawned
@@ -102,7 +157,7 @@ void ALevelGenerator::BeginPlay()
 
 }
 
-TArray<FVector4> ALevelGenerator::generateBaseRooms()
+TArray<FVector4> ALevelGenerator::generateBaseRooms() const
 {
 	TArray<FVector4> newRooms;
 
@@ -136,23 +191,22 @@ TArray<FVector4> ALevelGenerator::generateBaseRooms()
 	return newRooms;
 }
 
-bool ALevelGenerator::checkRoomsCollision(const TArray<FVector4> roomsIn, TArray<FVector4>& roomsOut)
+bool ALevelGenerator::checkRoomsCollision(TArray<FVector4>& roomsRef) const
 {
 	bool hasCollided = false;
-	roomsOut = roomsIn;
 
-	for (int i = 0; i < roomsOut.Num(); ++i)
+	for (int i = 0; i < roomsRef.Num(); ++i)
 	{
-		for (FVector roomB : roomsOut)
+		for (FVector roomB : roomsRef)
 		{
-			if (AABBVec4(roomsOut[i], roomB))
+			if (AABBVec4(roomsRef[i], roomB))
 			{
 				//move i away from j
-				FVector2D translateVec = FVector2D(roomsOut[i].X - roomB.X, roomsOut[i].Y - roomB.Y);
+				FVector2D translateVec = FVector2D(roomsRef[i].X - roomB.X, roomsRef[i].Y - roomB.Y);
 				translateVec.Normalize();
 				translateVec *= 256.0f;
-				roomsOut[i].X += translateVec.X;
-				roomsOut[i].Y += translateVec.Y;
+				roomsRef[i].X += translateVec.X;
+				roomsRef[i].Y += translateVec.Y;
 
 				if (!translateVec.Equals(FVector2D(0.0f)))
 				{
@@ -165,17 +219,15 @@ bool ALevelGenerator::checkRoomsCollision(const TArray<FVector4> roomsIn, TArray
 	return hasCollided;
 }
 
-void ALevelGenerator::clampRooms(const TArray<FVector4> roomsIn, TArray<FVector4>& roomsOut)
+void ALevelGenerator::clampRooms(TArray<FVector4>& roomsRef) const
 {
-	roomsOut = TArray<FVector4>();
-
-	for (int i = 0; i < roomsIn.Num(); ++i)
+	for (int i = 0; i < roomsRef.Num(); ++i)
 	{
-		roomsOut.Add(FVector4(FMath::RoundToFloat(roomsIn[i].X / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsIn[i].Y / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsIn[i].Z / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsIn[i].W / CELLSIZE) * CELLSIZE));
+		roomsRef[i] = FVector4(FMath::RoundToFloat(roomsRef[i].X / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsRef[i].Y / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsRef[i].Z / CELLSIZE) * CELLSIZE, FMath::RoundToFloat(roomsRef[i].W / CELLSIZE) * CELLSIZE);
 	}
 }
 
-void ALevelGenerator::findMainRooms(const TArray<FVector4> roomsIn, TArray<int>& mainRoomIDsOut)
+void ALevelGenerator::findMainRooms(const TArray<FVector4> roomsIn, TArray<int>& mainRoomIDsOut) const
 {
 	float meanArea = 0.0f;
 
@@ -197,7 +249,7 @@ void ALevelGenerator::findMainRooms(const TArray<FVector4> roomsIn, TArray<int>&
 	}
 }
 
-void ALevelGenerator::triangulateRooms(const TArray<FVector4> roomsIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut)
+void ALevelGenerator::triangulateRooms(const TArray<FVector4> roomsIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut) const
 {
 	std::vector<double> coords = std::vector<double>();
 	TArray<FVector2D> roomVerts = TArray<FVector2D>();
@@ -236,7 +288,7 @@ void ALevelGenerator::triangulateRooms(const TArray<FVector4> roomsIn, TArray<FT
 	}
 }
 
-void ALevelGenerator::minimalSpanningTree(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut)
+void ALevelGenerator::minimalSpanningTree(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut) const
 {
 	bool hasCompleted = false; //if the function has visited every node
 
@@ -329,7 +381,7 @@ void ALevelGenerator::minimalSpanningTree(const TArray<FVector4> roomsIn, const 
 	}
 }
 
-void ALevelGenerator::generateCorridors(const TArray<FTriEdge> edgesIn, TArray<FTriEdge>& edgesOut)
+void ALevelGenerator::generateCorridors(const TArray<FTriEdge> edgesIn, TArray<FTriEdge>& edgesOut) const
 {
 	edgesOut = TArray<FTriEdge>();
 
@@ -360,7 +412,7 @@ void ALevelGenerator::generateCorridors(const TArray<FTriEdge> edgesIn, TArray<F
 	}
 }
 
-void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn, TArray<ERoomTypeEnum>& roomTypesOut)
+void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn, TArray<ERoomTypeEnum>& roomTypesOut) const
 {
 	float specialRoomChance;
 
@@ -453,7 +505,7 @@ void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn, TArray<ERoom
 	}
 }
 
-void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, const TArray<ERoomTypeEnum> roomTypesIn)
+void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, const TArray<ERoomTypeEnum> roomTypesIn) const
 {
 	TArray<FVector> doorsPos = TArray<FVector>();
 
@@ -532,7 +584,7 @@ void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray
 	}
 }
 
-void ALevelGenerator::createWallMeshInstances(const TArray<FVector4> roomsIn)
+void ALevelGenerator::createWallMeshInstances(const TArray<FVector4> roomsIn) const
 {
 	WallMeshInstances->ClearInstances();
 
@@ -549,7 +601,7 @@ void ALevelGenerator::createWallMeshInstances(const TArray<FVector4> roomsIn)
 	}
 }
 
-bool ALevelGenerator::AABBVec4(const FVector4 roomA, const FVector4 roomB)
+bool ALevelGenerator::AABBVec4(const FVector4 roomA, const FVector4 roomB) const
 {
 	const float extraSpace = 720.0f;
 
@@ -563,7 +615,7 @@ bool ALevelGenerator::AABBVec4(const FVector4 roomA, const FVector4 roomB)
 	return collisionX && collisionY;
 }
 
-FVector2D ALevelGenerator::getRandomPointInEllipse(float width, float height)
+FVector2D ALevelGenerator::getRandomPointInEllipse(float width, float height) const
 {
 	float t = 2.0f * PI * FMath::FRand();
 	float u = FMath::FRand() + FMath::FRand();
@@ -581,7 +633,7 @@ FVector2D ALevelGenerator::getRandomPointInEllipse(float width, float height)
 	return FVector2D(width * r * FMath::Cos(t) / 2.0f, height * r * FMath::Cos(t) / 2.0f);
 }
 
-UClass* ALevelGenerator::getRandomEnemyBP()
+UClass* ALevelGenerator::getRandomEnemyBP() const
 {
 	TArray<UClass*> enemies = TArray<UClass*>({ BP_Slime, BP_Slime_Fire, BP_Enemy_MeleeWalker });
 

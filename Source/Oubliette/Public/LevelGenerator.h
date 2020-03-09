@@ -80,49 +80,9 @@ protected:
 public:
 	AOublietteCharacter* charRef;
 
-	//generates 24 randomly sized and positioned rooms stored as FVector4 (x pos, y pos, width, height)
+	//uses the previous functions to generate a whole level to completion
 	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	TArray<FVector4> generateBaseRooms();
-
-	//checks all given rooms for collisions, if one occurs then the room is moved away from the room it is colliding with - returns false if no collisions occur
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	bool checkRoomsCollision(const TArray<FVector4> roomsIn, TArray<FVector4>& roomsOut);
-
-	//clamps room positions and sizes to the grid cell size
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void clampRooms(const TArray<FVector4> roomsIn, TArray<FVector4>& roomsOut);
-
-	//filters rooms to be of a similar size within a range
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void findMainRooms(const TArray<FVector4> roomsIn, TArray<int>& mainRoomIDsOut);
-
-	//performs Delaunay triangulation using Delaunator by delfrrr which can be found at https://github.com/delfrrr/delaunator-cpp
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void triangulateRooms(const TArray<FVector4> roomsIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut);
-
-	//generates a minimal spanning tree using Prim's algorithm
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void minimalSpanningTree(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut);
-
-	//generates corridors between rooms using L corners if needed - unused for gameplay currently
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void generateCorridors(const TArray<FTriEdge> edgesIn, TArray<FTriEdge>& edgesOut);
-
-	//spawns objects like enemies and chests into the rooms
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void populateRooms(const TArray<FVector4> roomsIn, TArray<ERoomTypeEnum>& roomTypesOut);
-
-	//spawns doors to connect all the rooms using the minimal spanning tree
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, const TArray<ERoomTypeEnum> roomTypesIn);
-
-	//adds a static mesh instance for each room's 4 walls
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void createWallMeshInstances(const TArray<FVector4> roomsIn);
-
-	//iterates through all actors used for level generation and deletes them all
-	UFUNCTION(BlueprintCallable, Category = "Level Generation")
-	void cleanUpActors();
+		void generateLevel() const;
 
 private:
 	UWorld* w;
@@ -142,10 +102,46 @@ private:
 	UClass* BP_Enemy_MeleeWalker;
 	UClass* BP_Trapdoor;
 	UClass* BP_Door;
+	UClass* BP_Room;
 
 	//Helper functions
 
-	bool AABBVec4(const FVector4 roomA, const FVector4 roomB);
-	FVector2D getRandomPointInEllipse(float width, float height);
-	UClass* getRandomEnemyBP();
+	bool AABBVec4(const FVector4 roomA, const FVector4 roomB) const;
+	FVector2D getRandomPointInEllipse(float width, float height) const;
+	UClass* getRandomEnemyBP() const;
+
+	//Level gen functions
+
+	//generates 24 randomly sized and positioned rooms stored as FVector4 (x pos, y pos, width, height)
+	TArray<FVector4> generateBaseRooms() const;
+
+	//checks all given rooms for collisions, if one occurs then the room is moved away from the room it is colliding with - returns false if no collisions occur
+	bool checkRoomsCollision(TArray<FVector4>& roomsRef) const;
+
+	//clamps room positions and sizes to the grid cell size
+	void clampRooms(TArray<FVector4>& roomsRef) const;
+
+	//filters rooms to be of a similar size within a range
+	void findMainRooms(const TArray<FVector4> roomsIn, TArray<int>& mainRoomIDsOut) const;
+
+	//performs Delaunay triangulation using Delaunator by delfrrr which can be found at https://github.com/delfrrr/delaunator-cpp
+	void triangulateRooms(const TArray<FVector4> roomsIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut) const;
+
+	//generates a minimal spanning tree using Prim's algorithm
+	void minimalSpanningTree(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, TArray<FTriEdge>& edgesOut, TArray<FVector2D>& indexTreeOut) const;
+
+	//generates corridors between rooms using L corners if needed - unused for gameplay currently
+	void generateCorridors(const TArray<FTriEdge> edgesIn, TArray<FTriEdge>& edgesOut) const;
+
+	//spawns objects like enemies and chests into the rooms
+	void populateRooms(const TArray<FVector4> roomsIn, TArray<ERoomTypeEnum>& roomTypesOut) const;
+
+	//spawns doors to connect all the rooms using the minimal spanning tree
+	void generateDoors(const TArray<FVector4> roomsIn, const TArray<FVector2D> indexTreeIn, const TArray<ERoomTypeEnum> roomTypesIn) const;
+
+	//adds a static mesh instance for each room's 4 walls
+	void createWallMeshInstances(const TArray<FVector4> roomsIn) const;
+
+	//iterates through all actors used for level generation and deletes them all
+	void cleanUpActors() const;
 };
