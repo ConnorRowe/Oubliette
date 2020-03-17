@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 using UnrealBuildTool;
+using System.IO;
 
 public class Oubliette : ModuleRules
 {
@@ -8,7 +9,9 @@ public class Oubliette : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule", "PhysX", "APEX", "ApexDestruction" });
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "AIModule", "PhysX", "APEX", "ApexDestruction", "Niagara" });
+
+		PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Niagara"));
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

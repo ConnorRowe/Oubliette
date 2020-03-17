@@ -3,8 +3,10 @@
 #include "OublietteCharacter.h"
 #include "Engine/World.h"
 
+#define BASETICKRATE 0.4f
+
 // Sets default values
-AOublietteCharacter::AOublietteCharacter()
+AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitializer)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -13,8 +15,84 @@ AOublietteCharacter::AOublietteCharacter()
 	
 	if (GetWorld())
 	{
-		gm = (AGameModeOubliette*)GetWorld()->GetAuthGameMode();
+		w = GetWorld();
+		gm = (AGameModeOubliette*)w->GetAuthGameMode();
 	}
+
+	//Asset loading
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> HandMeshObj(TEXT("SkeletalMesh'/Game/Meshes/Skeletal/SK_Hand.SK_Hand'"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SpellTargetMeshObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_SpellTargetArea.SM_SpellTargetArea'"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> TargetDecalMatObj(TEXT("Material'/Game/Materials/M_SpellAreaTargetDecal.M_SpellAreaTargetDecal'"));	
+	static ConstructorHelpers::FObjectFinder<USoundCue> SpellChargeCueObj(TEXT("SoundCue'/Game/Sound/Spell_Charge_Cue.Spell_Charge_Cue'")); SpellChargeCue = Cast<USoundCue>(SpellChargeCueObj.Object);
+
+	//Component initialisation
+	firstPersonCamera = ObjectInitializer.CreateDefaultSubobject<UCameraComponent>(this, TEXT("FirstPersonCamera"));
+	firstPersonCamera->SetupAttachment(this->GetRootComponent());
+	firstPersonCamera->SetRelativeLocation(FVector(-49.697f, 1.75f, 64.248f));
+	firstPersonCamera->bUsePawnControlRotation = true;
+
+	SK_HandL = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("Hand_L"));
+	SK_HandR = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("Hand_R"));
+
+	SK_HandL->SetupAttachment(firstPersonCamera);
+	SK_HandL->SetRelativeLocation(FVector(61.29f, -58.0f, -51.95f));
+	SK_HandL->SetRelativeRotation(FRotator(0.0f, 93.599838f, 0.0f));
+	SK_HandL->SetRelativeScale3D(FVector(-0.3f, 0.3f, 0.3f));
+	SK_HandL->SetSkeletalMesh(Cast<USkeletalMesh>(HandMeshObj.Object));
+	SK_HandL->SetCollisionProfileName(TEXT("CharacterMesh"));
+	
+	SK_HandR->SetupAttachment(firstPersonCamera);
+	SK_HandR->SetRelativeLocation(FVector(61.29f, 58.0f, -51.95f));
+	SK_HandR->SetRelativeRotation(FRotator(0.0f, 93.599838f, 0.0f));
+	SK_HandR->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.3f));
+	SK_HandR->SetSkeletalMesh(Cast<USkeletalMesh>(HandMeshObj.Object));
+	SK_HandR->SetCollisionProfileName(TEXT("CharacterMesh"));
+
+	spellPosL = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("Spell_L"));
+	spellPosR = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("Spell_R"));
+
+	spellPosL->SetupAttachment(SK_HandL, TEXT("Hand"));
+	spellPosL->SetRelativeLocation(FVector(0.027701f, -0.676782f, -0.544008f));
+	spellPosL->SetRelativeScale3D(FVector(0.005f));
+
+	spellPosR->SetupAttachment(SK_HandR, TEXT("Hand"));
+	spellPosR->SetRelativeLocation(FVector(0.027695f, -0.676783f, -0.544007));
+	spellPosR->SetRelativeScale3D(FVector(0.005f));
+
+	spellParticleL = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Spell_Particles_L"));
+	spellParticleR = ObjectInitializer.CreateDefaultSubobject<UParticleSystemComponent>(this, TEXT("Spell_Particles_R"));
+
+	spellParticleL->SetupAttachment(spellPosL);
+	spellParticleL->SetRelativeLocation(FVector(21.54f, 7.82f, 0.0f));
+	spellParticleL->SetRelativeScale3D(FVector(-1.0f, 1.0f, 1.0f));
+	spellParticleR->SetupAttachment(spellPosR);
+	spellParticleR->SetRelativeLocation(FVector(21.54f, 7.82f, 0.0f));
+
+	areaTarget = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("AreaTarget"));
+	targetDecal = ObjectInitializer.CreateDefaultSubobject<UDecalComponent>(this, TEXT("Target Decal"));
+	SM_SpellTargetArea = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, "SM_SpellTargetArea");
+
+	areaTarget->SetupAttachment(this->GetRootComponent());
+	targetDecal->SetupAttachment(areaTarget);
+	SM_SpellTargetArea->SetupAttachment(areaTarget);
+
+	targetDecal->SetRelativeLocation(FVector(0.0f, 0.0f, -13.0f));
+	targetDecal->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+	targetDecal->SetMaterial(0, Cast<UMaterialInterface>(TargetDecalMatObj.Object));
+	targetDecal->DecalSize = FVector(6.0f, 128.0f, 128.0f);
+
+	SM_SpellTargetArea->SetRelativeLocation(FVector(0.0f, 0.0f, -13.0f));
+	SM_SpellTargetArea->SetRelativeScale3D(FVector(0.4f));
+	SM_SpellTargetArea->SetStaticMesh(Cast<UStaticMesh>(SpellTargetMeshObj.Object));
+	SM_SpellTargetArea->SetCollisionProfileName(TEXT("NoCollision"));
+
+	areaTarget->SetVisibility(false);
+	targetDecal->SetVisibility(false);
+	SM_SpellTargetArea->SetVisibility(false);
+
+	ChannelSpellNiagara = ObjectInitializer.CreateDefaultSubobject<UNiagaraComponent>(this, TEXT("ChannelSpellNiagara"));
+	ChannelSpellNiagara->SetupAttachment(spellPosR);
+	ChannelSpellNiagara->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +119,22 @@ void AOublietteCharacter::Tick(float DeltaTime)
 	if (ManaCurrent > ManaMax)
 	{
 		ManaCurrent = ManaMax;
+	}
+
+	//Update channel spell stuff
+	if (bIsAttackingR && ActiveSpellRNew.SpellFormation == ESpellFormsEnum::SFE_Channel)
+	{
+		float baseChannelRange = 1000.0f;
+		float traceLength = baseChannelRange + (((float)ChannelRange * 0.01f) * baseChannelRange);
+
+		FLineTraceData lineTrace = tryLineTrace(traceLength, firstPersonCamera);
+
+		ChannelSpellNiagara->SetWorldRotation(UKismetMathLibrary::FindLookAtRotation(lineTrace.TraceStart, lineTrace.TraceEnd));
+
+		ChannelSpellNiagara->SetVariableFloat(TEXT("User.CylinderLength"), lineTrace.Distance);
+		ChannelSpellNiagara->SetVariableVec3(TEXT("User.CylinderOffset"), FVector(lineTrace.Distance, 0.0f, 0.0f));
+
+		ChannelTarget = (lineTrace.Return_Value) ? lineTrace.Location : lineTrace.TraceEnd;
 	}
 }
 
@@ -72,14 +166,13 @@ FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneCompon
 	FVector tStart = startComp->GetComponentLocation();
 	FVector tEnd = tStart + (startComp->GetForwardVector() * traceLength);
 
-	//get game mode
-	AGameModeOubliette* gm = (AGameModeOubliette*)GetWorld()->GetAuthGameMode();
-
 	//ignore all room objects as well as self
 	ignoredActors.Append(gm->allRooms);
 
 	//setup trace parameters
-	RV_TraceParams = FCollisionQueryParams(FName(TEXT("RV_Trace")), false, this);
+	const FName TraceTag("RV_Trace");
+	RV_TraceParams = FCollisionQueryParams(TraceTag, false, this);
+	//w->DebugDrawTraceTag = TraceTag;
 	RV_TraceParams.bTraceComplex = false;
 	RV_TraceParams.bReturnPhysicalMaterial = false;
 
@@ -87,7 +180,7 @@ FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneCompon
 	FHitResult RV_Hit(ForceInit);
 
 	//call GetWorld() from within an actor extending class
-	GetWorld()->LineTraceSingleByChannel(
+	w->LineTraceSingleByChannel(
 		RV_Hit,			//result
 		tStart,			//start
 		tEnd,			//end
@@ -424,6 +517,124 @@ void AOublietteCharacter::RemoveBuffByName(const FName Name)
 
 		//Remove the buff
 		removeBuff(*foundBuff);
+	}
+}
+
+void AOublietteCharacter::setSpellOffensive(const FOffensiveSpellStruct newSpell)
+{
+	ActiveSpellRNew = newSpell;
+
+	switch (newSpell.SpellFormation)
+	{
+	case ESpellFormsEnum::SFE_Channel:
+	{
+		FSpellChannelStruct spellData = gm->Spells_Channel[(int)newSpell.SpellElement];
+		spellParticleR->SetTemplate(spellData.HandParticle);
+		SK_HandR->SetVectorParameterValueOnMaterials("RuneColour", FVector(spellData.HandColour));
+		ChannelNiagaraAsset = Cast<UNiagaraSystem>(spellData.ChannelNiagaraSys.TryLoad());
+		DamageNiagaraAsset = Cast<UNiagaraSystem>(spellData.DamageNiagaraSys.TryLoad());
+
+		ChannelSpellNiagara->SetAsset(ChannelNiagaraAsset);
+
+		break;
+	}
+	case ESpellFormsEnum::SFE_HitScan:
+	{
+		FSpellHitScanStruct spellData = gm->Spells_HitScan[(int)newSpell.SpellElement];
+		spellParticleR->SetTemplate(spellData.HandParticle);
+		SK_HandR->SetVectorParameterValueOnMaterials("RuneColour", FVector(spellData.HandColour));
+
+		break;
+	}
+	case ESpellFormsEnum::SFE_Projectile:
+	{
+		FSpellProjectileStruct spellData = gm->Spells_Projectile[(int)newSpell.SpellElement];
+		spellParticleR->SetTemplate(spellData.HandParticle);
+		SK_HandR->SetVectorParameterValueOnMaterials("RuneColour", FVector(spellData.HandColour));
+
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void AOublietteCharacter::setSpellUtility(const ESpellUtilsEnum newSpell)
+{
+	ActiveSpellLNew = newSpell;
+
+	switch (newSpell)
+	{
+	case ESpellUtilsEnum::SUE_Blink:
+	{
+		FSpellUtilStruct spellData = gm->Spells_Utility[(int)newSpell];
+		spellParticleL->SetTemplate(spellData.HandParticle);
+		SK_HandL->SetVectorParameterValueOnMaterials("RuneColour", FVector(spellData.HandColour));
+
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void AOublietteCharacter::chargeSpellOffensive(const FOffensiveSpellStruct spell)
+{
+	switch (spell.SpellFormation)
+	{
+	case ESpellFormsEnum::SFE_Channel:
+	{
+		FSpellChannelStruct spellData = gm->Spells_Channel[(int)spell.SpellElement];
+
+		ChannelSpellNiagara->Activate();
+		ChannelSpellNiagara->SetVariableVec3("User.BeamStart", spellPosR->GetComponentLocation());
+		ChannelSpellNiagara->SetVariableLinearColor("User.ParticleColour", spellData.HandColour);
+		ChannelSpellNiagara->SetVisibility(true);
+
+		ChannelCurrent = spellPosR->GetComponentLocation();
+		ChannelTarget = ChannelCurrent;
+
+		channelDmgActor = w->SpawnActorDeferred<AOublietteSpell_Channel>(BP_SpellChannel, FTransform(ChannelCurrent), nullptr, this);
+		UGameplayStatics::FinishSpawningActor(channelDmgActor, FTransform(ChannelCurrent));
+
+		float tickRate = (BASETICKRATE * (ChannelTickrate * 0.01)) + BASETICKRATE;
+
+		channelDmgActor->initChannel(spellData.BaseDamagePerSec, spellData.DamageType, tickRate, DoubleRadius * 0.01, spellData.HandColour, DamageNiagaraAsset);
+
+		channelSound = UGameplayStatics::SpawnSoundAttached(spellData.LoopSound, spellPosR);
+
+		break;
+	}
+	case ESpellFormsEnum::SFE_HitScan:
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, SpellChargeCue, spellPosR->GetComponentLocation());
+
+		break;
+	}
+	case ESpellFormsEnum::SFE_Projectile:
+	{
+		
+		UGameplayStatics::PlaySoundAtLocation(this, SpellChargeCue, spellPosR->GetComponentLocation());
+
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void AOublietteCharacter::finishSpellOffensive(const FOffensiveSpellStruct spell)
+{
+	switch (spell.SpellFormation)
+	{
+	case ESpellFormsEnum::SFE_Channel:
+	{
+		ChannelSpellNiagara->SetVisibility(false);
+		channelSound->Stop();
+		channelDmgActor->finish();
+	}
+	default:
+		break;
 	}
 }
 

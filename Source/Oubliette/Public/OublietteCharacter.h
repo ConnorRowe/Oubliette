@@ -13,7 +13,19 @@
 #include "CollisionQueryParams.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/DamageType.h"
+#include "CoreUObject/Public/Uobject/ConstructorHelpers.h"
 #include "GenericTeamAgentInterface.h"
+#include "Engine/Classes/Camera/CameraComponent.h"
+#include "Engine/Classes/Components/DecalComponent.h"
+#include "Engine/Classes/Components/SkeletalMeshComponent.h"
+#include "Animation/AnimBlueprint.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Engine/World.h"
+#include "Engine/Classes/Components/AudioComponent.h"
 #include "OublietteCharacter.generated.h"
 
 USTRUCT(BlueprintType)
@@ -70,13 +82,15 @@ class OUBLIETTE_API AOublietteCharacter : public ACharacter, public IGenericTeam
 
 public:
 	// Sets default values for this character's properties
-	AOublietteCharacter();
+	AOublietteCharacter(const FObjectInitializer& ObjectInitializer);
 
 private:
 	FGenericTeamId TeamId;
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	AGameModeOubliette* gm;
 	float BaseSpellDamage;
+	UWorld* w;
+	UAudioComponent* channelSound;
 
 protected:
 	// Called when the game starts or when spawned
@@ -88,6 +102,31 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//Components
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UCameraComponent* firstPersonCamera;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* SK_HandL;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* SK_HandR;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USceneComponent* spellPosL;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USceneComponent* spellPosR;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UParticleSystemComponent* spellParticleL;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UParticleSystemComponent* spellParticleR;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USceneComponent* areaTarget;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UDecalComponent* targetDecal;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* SM_SpellTargetArea;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UNiagaraComponent* ChannelSpellNiagara;
+
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
 	void BuffApplied(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon);
@@ -143,6 +182,16 @@ public:
 
 	TArray<FCurrentBuff> CurrentBuffs;
 
+	//Spell functions
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+	void setSpellOffensive(const FOffensiveSpellStruct newSpell);
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+	void setSpellUtility(const ESpellUtilsEnum newSpell);
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+	void chargeSpellOffensive(const FOffensiveSpellStruct spell);
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+	void finishSpellOffensive(const FOffensiveSpellStruct spell);
+
 	//Spell vars
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	bool bIsAttackingL;
@@ -152,6 +201,12 @@ public:
 	bool bCanAttackL = true;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	bool bCanAttackR = true;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	FVector ChannelTarget;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	FVector ChannelCurrent;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+	AOublietteSpell_Channel* channelDmgActor;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	EHandEnum HandEnumNEW = EHandEnum::HE_Left;
@@ -159,6 +214,15 @@ public:
 	FOffensiveSpellStruct ActiveSpellRNew;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 	ESpellUtilsEnum ActiveSpellLNew;
+
+	//Assets
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
+	UNiagaraSystem* ChannelNiagaraAsset;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
+	UNiagaraSystem* DamageNiagaraAsset;
+	USoundCue* SpellChargeCue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
+	TSubclassOf<AOublietteSpell_Channel> BP_SpellChannel;
 
 	//Items
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Inventory")

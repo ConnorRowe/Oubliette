@@ -3,14 +3,6 @@
 
 #include "OublietteSpell.h"
 
-// Sets default values
-AOublietteSpell::AOublietteSpell()
-{
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
-}
-
 void AOublietteSpell::init(float Damage, TSubclassOf<UDamageType> DamageType)
 {
 	spellDamage = Damage;

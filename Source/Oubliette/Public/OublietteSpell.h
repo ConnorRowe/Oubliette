@@ -10,21 +10,19 @@ UCLASS()
 class OUBLIETTE_API AOublietteSpell : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AOublietteSpell();
-
-	UFUNCTION(BlueprintCallable, Category = "Spells")
-	void init(float Damage, TSubclassOf<UDamageType> DamageType);
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Spells")
+	void init(float Damage, TSubclassOf<UDamageType> DamageType);
+
 
 	UPROPERTY(BlueprintReadWrite, Category = "Spells")
 	float spellDamage;
