@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h" 
 #include "OublietteSpell.h"
 #include "OublietteSpell_HitScan.generated.h"
 
@@ -19,6 +21,13 @@ public:
 		void initHitScan(float CalcedDamage, TSubclassOf<UDamageType> Element, float DoubleExplodeChance);
 	virtual void initHitScan_Implementation(float CalcedDamage, TSubclassOf<UDamageType> Element, float DoubleExplodeChance);
 
+	UFUNCTION(BlueprintCallable, Category = "Spells")
+		void dealDamage();
+
 	UPROPERTY(BlueprintReadWrite, Category = "Spells")
 		float doubleExplodeChance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assets")
+		USoundCue* SpellExplosionCue;
+
 };

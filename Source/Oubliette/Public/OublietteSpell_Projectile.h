@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SphereComponent.h"
 #include "OublietteSpell.h"
 #include "OublietteSpell_Projectile.generated.h"
 
@@ -15,6 +16,9 @@ class OUBLIETTE_API AOublietteSpell_Projectile : public AOublietteSpell
 	GENERATED_BODY()
 
 public:
+	AOublietteSpell_Projectile(const FObjectInitializer& ObjectInitializer);
+
+public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
 		void initProjectile(float CalcedDamage, TSubclassOf<UDamageType> Element, float ProjectileSpeed, float DoubleExplodeChance);
 	virtual void initProjectile_Implementation(float CalcedDamage, TSubclassOf<UDamageType> Element, float ProjectileSpeed, float DoubleExplodeChance);
@@ -23,4 +27,7 @@ public:
 		float projectileSpeed;
 	UPROPERTY(BlueprintReadWrite, Category = "Spells")
 		float doubleExplodeChance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		USphereComponent* collisionComponent;
 };

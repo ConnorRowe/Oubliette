@@ -3,7 +3,8 @@
 #include "OublietteCharacter.h"
 #include "Engine/World.h"
 
-constexpr float BASECHANNELTICKRATE = 0.4f;
+constexpr float BASE_CHANNEL_TICKRATE = 0.4f;
+constexpr float BASE_PROJ_SPEED = 1000.0f;
 
 // Sets default values
 AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitializer)
@@ -578,6 +579,7 @@ void AOublietteCharacter::setSpellUtility(const ESpellUtilsEnum newSpell)
 	}
 }
 
+//When the spell starts to charge
 void AOublietteCharacter::chargeSpellOffensive(const FOffensiveSpellStruct spell)
 {
 	switch (spell.SpellFormation)
@@ -597,7 +599,7 @@ void AOublietteCharacter::chargeSpellOffensive(const FOffensiveSpellStruct spell
 		channelDmgActor = w->SpawnActorDeferred<AOublietteSpell_Channel>(BP_SpellChannel, FTransform(ChannelCurrent), nullptr, this);
 		UGameplayStatics::FinishSpawningActor(channelDmgActor, FTransform(ChannelCurrent));
 
-		float tickRate = (BASECHANNELTICKRATE * (ChannelTickrate * 0.01)) + BASECHANNELTICKRATE;
+		float tickRate = (BASE_CHANNEL_TICKRATE * (ChannelTickrate * 0.01)) + BASE_CHANNEL_TICKRATE;
 
 		channelDmgActor->initChannel(spellData.BaseDamagePerSec, spellData.DamageType, tickRate, DoubleRadius * 0.01, spellData.HandColour, DamageNiagaraAsset);
 
@@ -623,6 +625,7 @@ void AOublietteCharacter::chargeSpellOffensive(const FOffensiveSpellStruct spell
 	}
 }
 
+//When the spell finishes casting
 void AOublietteCharacter::finishSpellOffensive(const FOffensiveSpellStruct spell)
 {
 	switch (spell.SpellFormation)
@@ -632,6 +635,59 @@ void AOublietteCharacter::finishSpellOffensive(const FOffensiveSpellStruct spell
 		ChannelSpellNiagara->SetVisibility(false);
 		channelSound->Stop();
 		channelDmgActor->finish();
+	}
+	default:
+		break;
+	}
+}
+
+//When the spell is fully charged and the player releases the cast input
+void AOublietteCharacter::castSpellOffensive()
+{
+	TrySpendMana(EHandEnum::HE_Right);
+
+	tryActivateBuff(EBuffSourceEnum::EBSE_OnCast);
+
+	switch (ActiveSpellRNew.SpellFormation)
+	{
+	case ESpellFormsEnum::SFE_HitScan:
+	{
+		FSpellHitScanStruct spellData = gm->Spells_HitScan[(int)ActiveSpellRNew.SpellElement];
+
+		FLineTraceData traceHS = tryLineTrace(2000.0f, firstPersonCamera);
+
+		FVector location = (traceHS.Return_Value) ? traceHS.Location : traceHS.TraceEnd;
+
+		hitscanDmgActor = w->SpawnActor<AOublietteSpell_HitScan>(BP_SpellHitScan, FTransform(location));
+		hitscanDmgActor->SetInstigator(this);
+
+		FSpellDamageCalc spellDmg = calcSpellDamage();
+
+		hitscanDmgActor->initHitScan(spellDmg.Damage, spellData.DamageType, ((float)DoubleRadius * 0.01));
+
+		hitscanDmgActor->dealDamage();
+
+		break;
+	}
+	case ESpellFormsEnum::SFE_Projectile:
+	{
+		FSpellProjectileStruct spellData = gm->Spells_Projectile[(int)ActiveSpellRNew.SpellElement];
+
+		FLineTraceData traceP = tryLineTrace(0.0f, firstPersonCamera);
+
+		projectileDmgActor = w->SpawnActor<AOublietteSpell_Projectile>(spellData.ProjectileClass, spellPosR->GetComponentLocation(), (traceP.Return_Value) ? UKismetMathLibrary::FindLookAtRotation(spellPosR->GetComponentLocation(), traceP.Location) : firstPersonCamera->GetComponentRotation());
+
+		projectileDmgActor->SetInstigator(this);
+
+		projectileDmgActor->collisionComponent->IgnoreActorWhenMoving(this, true);
+
+		FSpellDamageCalc spellDmg = calcSpellDamage();
+
+		projectileDmgActor->initProjectile(spellDmg.Damage, spellData.DamageType, BASE_PROJ_SPEED + (BASE_PROJ_SPEED * ProjSpeed * 0.01f), DoubleRadius * 0.01f);
+
+		UGameplayStatics::PlaySoundAtLocation(this, spellData.CastSound, spellPosR->GetComponentLocation());
+
+		break;
 	}
 	default:
 		break;

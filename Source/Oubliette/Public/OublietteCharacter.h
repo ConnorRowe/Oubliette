@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Oubliette.h"
+#include "OublietteSpell_HitScan.h"
 #include "MyDamageType_Arcane.h"
 #include "MyDamageType_Fire.h"
 #include "MyDamageType_Frost.h"
@@ -15,7 +16,7 @@
 #include "GameFramework/DamageType.h"
 #include "CoreUObject/Public/Uobject/ConstructorHelpers.h"
 #include "GenericTeamAgentInterface.h"
-#include "Engine/Classes/Camera/CameraComponent.h"
+#include "Camera/CameraComponent.h" 
 #include "Engine/Classes/Components/DecalComponent.h"
 #include "Engine/Classes/Components/SkeletalMeshComponent.h"
 #include "Animation/AnimBlueprint.h"
@@ -127,7 +128,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		UNiagaraComponent* ChannelSpellNiagara;
 
-
+	//Buff events
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
 		void BuffApplied(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon);
 	virtual void BuffApplied_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon);
@@ -154,6 +155,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
 		void addToStat(EStatsEnum Stat, float Amount);
 
+	//Buff functions
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
 		void applyBuff(const FBuffStruct& buff);
 	void applyBuff(const FCurrentBuff& buff);
@@ -191,6 +193,8 @@ public:
 		void chargeSpellOffensive(const FOffensiveSpellStruct spell);
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
 		void finishSpellOffensive(const FOffensiveSpellStruct spell);
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+		void castSpellOffensive();
 
 	//Spell vars
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
@@ -207,6 +211,10 @@ public:
 		FVector ChannelCurrent;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 		AOublietteSpell_Channel* channelDmgActor;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+		AOublietteSpell_HitScan* hitscanDmgActor;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+		AOublietteSpell_Projectile* projectileDmgActor;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 		EHandEnum HandEnumNEW = EHandEnum::HE_Left;
@@ -220,9 +228,11 @@ public:
 		UNiagaraSystem* ChannelNiagaraAsset;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
 		UNiagaraSystem* DamageNiagaraAsset;
-	USoundCue* SpellChargeCue;
+		USoundCue* SpellChargeCue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
 		TSubclassOf<AOublietteSpell_Channel> BP_SpellChannel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
+		TSubclassOf<AOublietteSpell_HitScan> BP_SpellHitScan;
 
 	//Items
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Inventory")
