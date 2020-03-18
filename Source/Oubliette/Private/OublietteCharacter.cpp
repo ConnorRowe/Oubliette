@@ -3,7 +3,7 @@
 #include "OublietteCharacter.h"
 #include "Engine/World.h"
 
-#define BASETICKRATE 0.4f
+constexpr float BASECHANNELTICKRATE = 0.4f;
 
 // Sets default values
 AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitializer)
@@ -597,7 +597,7 @@ void AOublietteCharacter::chargeSpellOffensive(const FOffensiveSpellStruct spell
 		channelDmgActor = w->SpawnActorDeferred<AOublietteSpell_Channel>(BP_SpellChannel, FTransform(ChannelCurrent), nullptr, this);
 		UGameplayStatics::FinishSpawningActor(channelDmgActor, FTransform(ChannelCurrent));
 
-		float tickRate = (BASETICKRATE * (ChannelTickrate * 0.01)) + BASETICKRATE;
+		float tickRate = (BASECHANNELTICKRATE * (ChannelTickrate * 0.01)) + BASECHANNELTICKRATE;
 
 		channelDmgActor->initChannel(spellData.BaseDamagePerSec, spellData.DamageType, tickRate, DoubleRadius * 0.01, spellData.HandColour, DamageNiagaraAsset);
 
