@@ -445,7 +445,7 @@ void ALevelGenerator::populateRooms(const TArray<FVector4> roomsIn, TArray<ERoom
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		
+
 		ERoomTypeEnum specialRoomType = ERoomTypeEnum::ERT_Standard;
 		//Try generate special room stuff
 		if (FMath::FRand() <= specialRoomChance)
@@ -520,7 +520,7 @@ void ALevelGenerator::generateDoors(const TArray<FVector4> roomsIn, const TArray
 		// 0 = East; 1 = North; 2 = West; 3 = South
 		int ABDir = (FMath::RoundToInt(8 * angle / (2 * PI) + 8) % 8) / 2;
 		int BADir = (ABDir + 2) % 4;
-		
+
 		float doorZRotA = 0.0f;
 		float doorZRotB = 0.0f;
 

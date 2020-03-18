@@ -28,7 +28,7 @@ AOublietteRoom::AOublietteRoom(const FObjectInitializer& ObjectInitializer)
 void AOublietteRoom::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	RoomBoxVolume->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 
 }

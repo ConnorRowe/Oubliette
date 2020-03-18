@@ -14,14 +14,14 @@ class USelectable : public UInterface
 };
 
 /**
- * 
+ *
  */
 class OUBLIETTE_API ISelectable
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+		// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Oubliette")
-	bool UpdateSelection(bool IsSelectedNew);
+		bool UpdateSelection(bool IsSelectedNew);
 };

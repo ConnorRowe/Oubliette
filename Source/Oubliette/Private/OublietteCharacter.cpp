@@ -8,11 +8,11 @@
 // Sets default values
 AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitializer)
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	TeamId = FGenericTeamId(0);
-	
+
 	if (GetWorld())
 	{
 		w = GetWorld();
@@ -22,7 +22,7 @@ AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitial
 	//Asset loading
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> HandMeshObj(TEXT("SkeletalMesh'/Game/Meshes/Skeletal/SK_Hand.SK_Hand'"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SpellTargetMeshObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_SpellTargetArea.SM_SpellTargetArea'"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> TargetDecalMatObj(TEXT("Material'/Game/Materials/M_SpellAreaTargetDecal.M_SpellAreaTargetDecal'"));	
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> TargetDecalMatObj(TEXT("Material'/Game/Materials/M_SpellAreaTargetDecal.M_SpellAreaTargetDecal'"));
 	static ConstructorHelpers::FObjectFinder<USoundCue> SpellChargeCueObj(TEXT("SoundCue'/Game/Sound/Spell_Charge_Cue.Spell_Charge_Cue'")); SpellChargeCue = Cast<USoundCue>(SpellChargeCueObj.Object);
 
 	//Component initialisation
@@ -40,7 +40,7 @@ AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitial
 	SK_HandL->SetRelativeScale3D(FVector(-0.3f, 0.3f, 0.3f));
 	SK_HandL->SetSkeletalMesh(Cast<USkeletalMesh>(HandMeshObj.Object));
 	SK_HandL->SetCollisionProfileName(TEXT("CharacterMesh"));
-	
+
 	SK_HandR->SetupAttachment(firstPersonCamera);
 	SK_HandR->SetRelativeLocation(FVector(61.29f, 58.0f, -51.95f));
 	SK_HandR->SetRelativeRotation(FRotator(0.0f, 93.599838f, 0.0f));
@@ -99,7 +99,7 @@ AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitial
 void AOublietteCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -112,7 +112,7 @@ void AOublietteCharacter::Tick(float DeltaTime)
 	//Regenerate Mana
 	if (ManaCurrent < ManaMax)
 	{
-		ManaCurrent += (baseManaRegen*(1.0f + (float)ManaRegenPercent) + (float)ManaRegen)*DeltaTime;
+		ManaCurrent += (baseManaRegen * (1.0f + (float)ManaRegenPercent) + (float)ManaRegen) * DeltaTime;
 	}
 
 	//Clamp Mana
@@ -196,7 +196,7 @@ FLineTraceData AOublietteCharacter::tryLineTrace(float traceLength, USceneCompon
 	tData.TraceStart = RV_Hit.TraceStart;
 	tData.Distance = RV_Hit.Distance;
 	tData.HitActor = RV_Hit.Actor;
-	
+
 	return tData;
 }
 
@@ -266,7 +266,7 @@ void AOublietteCharacter::calcBaseDamage()
 		elementalBonus = BonShock;
 		spellID = 2;
 		break;
-	
+
 	default:
 		break;
 	}
@@ -290,16 +290,16 @@ void AOublietteCharacter::calcBaseDamage()
 		break;
 	}
 
-	BaseSpellDamage = baseDamage * (1.0f + (float)Inte / 10.0f) * (1.0f + (elementalBonus/100.0f));
+	BaseSpellDamage = baseDamage * (1.0f + (float)Inte / 10.0f) * (1.0f + (elementalBonus / 100.0f));
 }
 
 FSpellDamageCalc AOublietteCharacter::calcSpellDamage()
 {
 	FSpellDamageCalc spellDmg;
-	
+
 	float critChance = 0.02f + (Wisd / 150.0f);
 
-	spellDmg.Damage = FMath::RandRange(BaseSpellDamage*0.8f, BaseSpellDamage*1.2f);
+	spellDmg.Damage = FMath::RandRange(BaseSpellDamage * 0.8f, BaseSpellDamage * 1.2f);
 
 
 	if (FMath::FRand() < critChance)
@@ -373,7 +373,7 @@ void AOublietteCharacter::addToStat(EStatsEnum Stat, float Amount)
 	}
 }
 
-void AOublietteCharacter::applyBuff(const FBuffStruct & buff)
+void AOublietteCharacter::applyBuff(const FBuffStruct& buff)
 {
 	FCurrentBuff newBuff;
 	newBuff.Name = buff.Name;
@@ -387,7 +387,7 @@ void AOublietteCharacter::applyBuff(const FBuffStruct & buff)
 	applyBuff(newBuff);
 }
 
-void AOublietteCharacter::applyBuff(const FCurrentBuff & buff)
+void AOublietteCharacter::applyBuff(const FCurrentBuff& buff)
 {
 	addToStat(buff.Stat, buff.StatAmount);
 
@@ -400,9 +400,9 @@ void AOublietteCharacter::applyBuff(const FCurrentBuff & buff)
 	UE_LOG(LogTemp, Warning, TEXT("___ %s ___ "), *bufflog);
 }
 
-void AOublietteCharacter::removeBuff(const FCurrentBuff & buff)
+void AOublietteCharacter::removeBuff(const FCurrentBuff& buff)
 {
-	addToStat(buff.Stat, buff.StatAmount*-1.0f);
+	addToStat(buff.Stat, buff.StatAmount * -1.0f);
 
 	FString bufflog;
 	bufflog = "Buff Removed: " + GETENUMSTRING("EStatsEnum", buff.Stat) + ", " + FString::SanitizeFloat(buff.StatAmount) + ", for " + FString::SanitizeFloat(buff.Duration) + " seconds";
@@ -433,7 +433,7 @@ void AOublietteCharacter::updateCurrentBuffs()
 	//Update reccuring buffs, which are not removed and constantly reapply themselves
 	if (Buffs_Reccuring.Num() > 0)
 	{
-		for (FCurrentBuff & Buff : Buffs_Reccuring)
+		for (FCurrentBuff& Buff : Buffs_Reccuring)
 		{
 			if ((time >= (Buff.StartTime + Buff.Duration)) && !buffExistsByName(Buff.Name))
 			{
@@ -444,7 +444,7 @@ void AOublietteCharacter::updateCurrentBuffs()
 	}
 }
 
-void AOublietteCharacter::tryActivateBuff(const EBuffSourceEnum & Source)
+void AOublietteCharacter::tryActivateBuff(const EBuffSourceEnum& Source)
 {
 	TArray<FBuffStruct>* Buffs = nullptr;
 
@@ -472,7 +472,7 @@ void AOublietteCharacter::tryActivateBuff(const EBuffSourceEnum & Source)
 
 	for (auto Buff : *Buffs)
 	{
-		float r = FMath::RandRange(0.0f,1.0f);
+		float r = FMath::RandRange(0.0f, 1.0f);
 
 		if (Buff.Chance > 0.0f && r <= Buff.Chance)
 		{
@@ -486,7 +486,7 @@ bool AOublietteCharacter::buffExistsByName(const FName Name)
 {
 	bool hasFoundBuff = false;
 
-	for (const auto & Buff : CurrentBuffs)
+	for (const auto& Buff : CurrentBuffs)
 	{
 		if (Buff.Name == Name)
 		{
@@ -613,7 +613,7 @@ void AOublietteCharacter::chargeSpellOffensive(const FOffensiveSpellStruct spell
 	}
 	case ESpellFormsEnum::SFE_Projectile:
 	{
-		
+
 		UGameplayStatics::PlaySoundAtLocation(this, SpellChargeCue, spellPosR->GetComponentLocation());
 
 		break;
@@ -657,7 +657,7 @@ int32* AOublietteCharacter::GetStat(EStatsEnum Stat)
 
 	case EStatsEnum::ESA_BonusFrost:
 		return &BonFrost;
-		
+
 	case EStatsEnum::ESA_BonusShadow:
 		return &BonShadow;
 
@@ -708,7 +708,7 @@ int32* AOublietteCharacter::GetStat(EStatsEnum Stat)
 
 	case EStatsEnum::ESA_BonusBurn:
 		return &BonusBurn;
-		
+
 	case EStatsEnum::ESA_BonusChill:
 		return &BonusChill;
 

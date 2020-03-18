@@ -7,7 +7,7 @@
 #include "EnemyAIController.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API AEnemyAIController : public AAIController
@@ -15,5 +15,5 @@ class OUBLIETTE_API AEnemyAIController : public AAIController
 	GENERATED_BODY()
 
 public:
-		AEnemyAIController();
+	AEnemyAIController();
 };

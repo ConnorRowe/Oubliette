@@ -13,8 +13,8 @@ UCLASS()
 class OUBLIETTE_API AOublietteItem : public AActor, public ISelectable, public IInteractable
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AOublietteItem();
 
@@ -22,12 +22,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Item")
-	FItemStruct ItemData;
+		FItemStruct ItemData;
 
 	//Selectable interface
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)

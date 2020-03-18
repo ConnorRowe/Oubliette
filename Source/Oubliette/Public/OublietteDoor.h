@@ -23,7 +23,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -37,8 +37,8 @@ public:
 		FVector targetLocation = FVector(0.0f);
 
 	UPROPERTY(BlueprintReadWrite)
-		AOublietteDoor* linkedDoor;	
-	
+		AOublietteDoor* linkedDoor;
+
 	UPROPERTY(BlueprintReadWrite)
 		ERoomTypeEnum RoomType;
 
@@ -46,11 +46,11 @@ public:
 		FVector DoorColour;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	bool UpdateSelection(bool IsSelectedNew);
-		virtual bool UpdateSelection_Implementation(bool IsSelectedNew) override;
+		bool UpdateSelection(bool IsSelectedNew);
+	virtual bool UpdateSelection_Implementation(bool IsSelectedNew) override;
 
 	//Interactable interface
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void Interact();
-		virtual void Interact_Implementation() override;
+		void Interact();
+	virtual void Interact_Implementation() override;
 };

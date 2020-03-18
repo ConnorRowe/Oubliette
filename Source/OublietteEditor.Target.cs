@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 public class OublietteEditorTarget : TargetRules
 {
-	public OublietteEditorTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Editor;
+    public OublietteEditorTarget(TargetInfo Target) : base(Target)
+    {
+        Type = TargetType.Editor;
 
-		ExtraModuleNames.AddRange( new string[] { "Oubliette" } );
-	}
+        ExtraModuleNames.AddRange(new string[] { "Oubliette" });
+    }
 }

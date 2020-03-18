@@ -7,7 +7,7 @@
 #include "MyDamageType_Shock.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API UMyDamageType_Shock : public UOublietteDamageType

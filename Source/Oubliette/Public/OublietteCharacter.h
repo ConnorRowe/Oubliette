@@ -33,18 +33,18 @@ struct FLineTraceData
 {
 	GENERATED_USTRUCT_BODY()
 
+		UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
+		bool Return_Value;
 	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
-	bool Return_Value;
+		FVector Location;
 	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
-	FVector Location;
+		FVector TraceStart;
 	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
-	FVector TraceStart;
+		FVector TraceEnd;
 	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
-	FVector TraceEnd;
+		TWeakObjectPtr<class AActor> HitActor;
 	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
-	TWeakObjectPtr<class AActor> HitActor;
-	UPROPERTY(BlueprintReadOnly, Category = "Line Trace")
-	float Distance;
+		float Distance;
 };
 
 USTRUCT(BlueprintType)
@@ -52,10 +52,10 @@ struct FSpellDamageCalc
 {
 	GENERATED_USTRUCT_BODY()
 
+		UPROPERTY(BlueprintReadOnly, Category = "Character | Spells")
+		float Damage;
 	UPROPERTY(BlueprintReadOnly, Category = "Character | Spells")
-	float Damage;
-	UPROPERTY(BlueprintReadOnly, Category = "Character | Spells")
-	bool isCrit = false;
+		bool isCrit = false;
 };
 
 struct FCurrentBuff
@@ -69,7 +69,7 @@ struct FCurrentBuff
 	FIconStruct Icon;
 
 	//override '==' operator so that TArray.Find() works.
-	FORCEINLINE bool operator==(const FCurrentBuff &Other) const
+	FORCEINLINE bool operator==(const FCurrentBuff& Other) const
 	{
 		return (Stat == Other.Stat && StatAmount == Other.StatAmount && Duration == Other.Duration);
 	}
@@ -96,7 +96,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -105,73 +105,73 @@ public:
 
 	//Components
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UCameraComponent* firstPersonCamera;
+		UCameraComponent* firstPersonCamera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	USkeletalMeshComponent* SK_HandL;
+		USkeletalMeshComponent* SK_HandL;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	USkeletalMeshComponent* SK_HandR;
+		USkeletalMeshComponent* SK_HandR;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	USceneComponent* spellPosL;
+		USceneComponent* spellPosL;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	USceneComponent* spellPosR;
+		USceneComponent* spellPosR;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UParticleSystemComponent* spellParticleL;
+		UParticleSystemComponent* spellParticleL;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UParticleSystemComponent* spellParticleR;
+		UParticleSystemComponent* spellParticleR;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	USceneComponent* areaTarget;
+		USceneComponent* areaTarget;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UDecalComponent* targetDecal;
+		UDecalComponent* targetDecal;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* SM_SpellTargetArea;
+		UStaticMeshComponent* SM_SpellTargetArea;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UNiagaraComponent* ChannelSpellNiagara;
+		UNiagaraComponent* ChannelSpellNiagara;
 
-	
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
-	void BuffApplied(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon);
+		void BuffApplied(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon);
 	virtual void BuffApplied_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration, bool IsHidden, FIconStruct Icon);
-	
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
-	void BuffRemoved(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
+		void BuffRemoved(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
 	virtual void BuffRemoved_Implementation(EStatsEnum BuffStat, FName BuffName, float StatAmount, float StartTime, float Duration);
 
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Utility")
-	FLineTraceData tryLineTrace(float traceLength, USceneComponent* startComp);
+		FLineTraceData tryLineTrace(float traceLength, USceneComponent* startComp);
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
-	void calculateStats();
+		void calculateStats();
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
-	void calcBaseDamage();
+		void calcBaseDamage();
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
-	FSpellDamageCalc calcSpellDamage();
+		FSpellDamageCalc calcSpellDamage();
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
-	bool TrySpendMana(EHandEnum Hand);
+		bool TrySpendMana(EHandEnum Hand);
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
-	void addToStat(EStatsEnum Stat, float Amount);
+		void addToStat(EStatsEnum Stat, float Amount);
 
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
-	void applyBuff(const FBuffStruct& buff);
-	void applyBuff(const FCurrentBuff & buff);
+		void applyBuff(const FBuffStruct& buff);
+	void applyBuff(const FCurrentBuff& buff);
 	void removeBuff(const FCurrentBuff& buff);
 	void updateCurrentBuffs();
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
-	void tryActivateBuff(const EBuffSourceEnum & Source);
+		void tryActivateBuff(const EBuffSourceEnum& Source);
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
-	bool buffExistsByName(const FName Name);
+		bool buffExistsByName(const FName Name);
 	UFUNCTION(BlueprintCallable, Category = "Character | Stats")
-	void RemoveBuffByName(const FName Name);
+		void RemoveBuffByName(const FName Name);
 
 
 	//Gameplay variables
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
-	bool bIsDead;
+		bool bIsDead;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
-	bool bInputEnabled;
+		bool bInputEnabled;
 
 	//Buff arrays from skill trees
 	TArray<FBuffStruct> Buffs_OnHit;
@@ -184,49 +184,49 @@ public:
 
 	//Spell functions
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
-	void setSpellOffensive(const FOffensiveSpellStruct newSpell);
+		void setSpellOffensive(const FOffensiveSpellStruct newSpell);
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
-	void setSpellUtility(const ESpellUtilsEnum newSpell);
+		void setSpellUtility(const ESpellUtilsEnum newSpell);
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
-	void chargeSpellOffensive(const FOffensiveSpellStruct spell);
+		void chargeSpellOffensive(const FOffensiveSpellStruct spell);
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
-	void finishSpellOffensive(const FOffensiveSpellStruct spell);
+		void finishSpellOffensive(const FOffensiveSpellStruct spell);
 
 	//Spell vars
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	bool bIsAttackingL;
+		bool bIsAttackingL;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	bool bIsAttackingR;
+		bool bIsAttackingR;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	bool bCanAttackL = true;
+		bool bCanAttackL = true;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	bool bCanAttackR = true;
+		bool bCanAttackR = true;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	FVector ChannelTarget;
+		FVector ChannelTarget;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	FVector ChannelCurrent;
+		FVector ChannelCurrent;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	AOublietteSpell_Channel* channelDmgActor;
+		AOublietteSpell_Channel* channelDmgActor;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	EHandEnum HandEnumNEW = EHandEnum::HE_Left;
+		EHandEnum HandEnumNEW = EHandEnum::HE_Left;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	FOffensiveSpellStruct ActiveSpellRNew;
+		FOffensiveSpellStruct ActiveSpellRNew;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	ESpellUtilsEnum ActiveSpellLNew;
+		ESpellUtilsEnum ActiveSpellLNew;
 
 	//Assets
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
-	UNiagaraSystem* ChannelNiagaraAsset;
+		UNiagaraSystem* ChannelNiagaraAsset;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
-	UNiagaraSystem* DamageNiagaraAsset;
+		UNiagaraSystem* DamageNiagaraAsset;
 	USoundCue* SpellChargeCue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
-	TSubclassOf<AOublietteSpell_Channel> BP_SpellChannel;
+		TSubclassOf<AOublietteSpell_Channel> BP_SpellChannel;
 
 	//Items
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Inventory")
-	TArray<FItemStruct> Inventory;
+		TArray<FItemStruct> Inventory;
 
 	//Base Stats
 	int32 baseInte = 1;
@@ -238,86 +238,86 @@ public:
 
 	//mana stuff
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	float ManaCurrent;
+		float ManaCurrent;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
-	float ManaMax;
+		float ManaMax;
 
 	//Actual Working Stats
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
-	int32 HealthCurrent;
+		int32 HealthCurrent;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Gameplay")
-	int32 HealthMax;
+		int32 HealthMax;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 Inte;
+		int32 Inte;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 Agil;
+		int32 Agil;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 Wisd;
+		int32 Wisd;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonFire;
+		int32 BonFire;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonFrost;
+		int32 BonFrost;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonShock;
+		int32 BonShock;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonArcane;
+		int32 BonArcane;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonShadow;
+		int32 BonShadow;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonUndead;
+		int32 BonUndead;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonSlime;
+		int32 BonSlime;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonBeast;
+		int32 BonBeast;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonXP;
+		int32 BonXP;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonLoot;
+		int32 BonLoot;
 	//'less-standard' ones
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 SpawnEyeOnKill;
+		int32 SpawnEyeOnKill;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 MagicSnails;
+		int32 MagicSnails;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 NiceRats;
+		int32 NiceRats;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 ShroomBonus;
+		int32 ShroomBonus;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 IgnoreDmg;
+		int32 IgnoreDmg;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 ProjSpeed;
+		int32 ProjSpeed;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 SpellPierce;
+		int32 SpellPierce;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 DoubleRadius;
+		int32 DoubleRadius;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonusBurn;
+		int32 BonusBurn;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonusChill;
+		int32 BonusChill;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonusStun;
+		int32 BonusStun;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 RegenManaChunkOnKill;
+		int32 RegenManaChunkOnKill;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 CastSpeed;
+		int32 CastSpeed;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 ChannelTickrate;
+		int32 ChannelTickrate;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 ChannelRange;
+		int32 ChannelRange;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 ArcToEnemy;
+		int32 ArcToEnemy;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 DamageShield;
+		int32 DamageShield;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 ManaCostReduction;
+		int32 ManaCostReduction;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonusMana;
+		int32 BonusMana;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 BonusManaPercent;
+		int32 BonusManaPercent;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 ManaRegen;
+		int32 ManaRegen;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Stats")
-	int32 ManaRegenPercent;
+		int32 ManaRegenPercent;
 
 	int32* GetStat(EStatsEnum Stat);
 };

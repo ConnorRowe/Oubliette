@@ -31,9 +31,9 @@ FItemStruct AGameModeOubliette::GenerateItemFromPool(const FItemPoolStruct ItemP
 	{
 		possibleItems = ItemPool.Legendary;
 	}
-	
-	FItemStruct newItem = possibleItems[FMath::RandRange(0,possibleItems.Num()-1)];
-	const FText & randTxt = FText::FromString("rand");
+
+	FItemStruct newItem = possibleItems[FMath::RandRange(0, possibleItems.Num() - 1)];
+	const FText& randTxt = FText::FromString("rand");
 
 	if (newItem.Prefix.EqualTo(randTxt))
 	{

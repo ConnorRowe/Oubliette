@@ -7,7 +7,7 @@
 #include "OublietteBPFLib.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API UOublietteBPFLib : public UBlueprintFunctionLibrary

@@ -7,7 +7,7 @@
 #include "OublietteSaveSlot.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API UOublietteSaveSlot : public UUserWidget
@@ -16,16 +16,16 @@ class OUBLIETTE_API UOublietteSaveSlot : public UUserWidget
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Saveslot")
-	int32 SaveID;
+		int32 SaveID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Saveslot")
-	int32 MetaID;
+		int32 MetaID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Saveslot")
-	FString LineageName;
+		FString LineageName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Saveslot")
-	int32 LineageLevel;
+		int32 LineageLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Saveslot")
-	FDateTime DTLastPlayed;
+		FDateTime DTLastPlayed;
 
 	UFUNCTION(BlueprintCallable, Category = "Lineage Saveslot")
-	void init(const int32 newSaveID, const int32 newMetaID, const FString newLineageName, const int32 newLineageLevel, const FDateTime newDTLastPlayed);
+		void init(const int32 newSaveID, const int32 newMetaID, const FString newLineageName, const int32 newLineageLevel, const FDateTime newDTLastPlayed);
 };

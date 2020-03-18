@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 public class OublietteTarget : TargetRules
 {
-	public OublietteTarget(TargetInfo Target) : base(Target)
-	{
-		Type = TargetType.Game;
+    public OublietteTarget(TargetInfo Target) : base(Target)
+    {
+        Type = TargetType.Game;
 
-		ExtraModuleNames.AddRange( new string[] { "Oubliette" } );
-	}
+        ExtraModuleNames.AddRange(new string[] { "Oubliette" });
+    }
 }

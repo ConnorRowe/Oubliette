@@ -12,8 +12,8 @@ UCLASS()
 class OUBLIETTE_API AOublietteChest : public AActor, public ISelectable, public IInteractable
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AOublietteChest();
 
@@ -21,20 +21,20 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Chest")
-	bool shouldOpen = false;
+		bool shouldOpen = false;
 	UPROPERTY(BlueprintReadWrite, Category = "Chest")
-	bool isOpening = false;
+		bool isOpening = false;
 	UPROPERTY(BlueprintReadWrite, Category = "Chest")
-	bool isOpen = false;
+		bool isOpen = false;
 	UPROPERTY(BlueprintReadWrite, Category = "Chest")
-	bool isSelected = false;
+		bool isSelected = false;
 	UPROPERTY(BlueprintReadWrite, Category = "Chest")
-	bool itemExists = false;
+		bool itemExists = false;
 
 	//Selectable interface
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)

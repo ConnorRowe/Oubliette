@@ -10,7 +10,7 @@
 #include "OublietteStartScreen.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API UOublietteStartScreen : public UUserWidget
@@ -19,6 +19,6 @@ class OUBLIETTE_API UOublietteStartScreen : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Saves")
-	TArray<FSaveSlotStruct> SortSaves(TArray<FSaveSlotStruct> SaveSlots, ESortMethodEnum SortMethod, bool isInverse);
+		TArray<FSaveSlotStruct> SortSaves(TArray<FSaveSlotStruct> SaveSlots, ESortMethodEnum SortMethod, bool isInverse);
 
 };

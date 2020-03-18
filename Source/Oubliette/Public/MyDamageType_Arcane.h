@@ -7,11 +7,11 @@
 #include "MyDamageType_Arcane.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API UMyDamageType_Arcane : public UOublietteDamageType
 {
 	GENERATED_BODY()
-	
+
 };

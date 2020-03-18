@@ -7,11 +7,11 @@
 #include "MyDamageType_Frost.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API UMyDamageType_Frost : public UOublietteDamageType
 {
 	GENERATED_BODY()
-	
+
 };

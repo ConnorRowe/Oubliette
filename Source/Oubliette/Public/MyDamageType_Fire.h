@@ -7,11 +7,11 @@
 #include "MyDamageType_Fire.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API UMyDamageType_Fire : public UOublietteDamageType
 {
 	GENERATED_BODY()
-	
+
 };

@@ -43,10 +43,10 @@ struct FTriEdge
 {
 	GENERATED_USTRUCT_BODY()
 
+		UPROPERTY(BlueprintReadWrite)
+		FVector2D start;
 	UPROPERTY(BlueprintReadWrite)
-	FVector2D start;
-	UPROPERTY(BlueprintReadWrite)
-	FVector2D end;
+		FVector2D end;
 
 	//override '==' operator so that TArray.AddUnique() works.
 	FORCEINLINE bool operator==(const FTriEdge& Other) const
@@ -70,8 +70,8 @@ class OUBLIETTE_API ALevelGenerator : public AActor
 {
 	GENERATED_UCLASS_BODY()
 
-	UPROPERTY(BlueprintReadWrite, Category = "Level Generation")
-	class UInstancedStaticMeshComponent* WallMeshInstances;
+		UPROPERTY(BlueprintReadWrite, Category = "Level Generation")
+		class UInstancedStaticMeshComponent* WallMeshInstances;
 
 protected:
 	// Called when the game starts or when spawned

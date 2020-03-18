@@ -15,7 +15,7 @@ void AOublietteSpell::init(float Damage, TSubclassOf<UDamageType> DamageType)
 void AOublietteSpell::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame

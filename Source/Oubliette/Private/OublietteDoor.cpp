@@ -21,7 +21,7 @@ AOublietteDoor::AOublietteDoor(const FObjectInitializer& ObjectInitializer)
 void AOublietteDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -39,7 +39,7 @@ void AOublietteDoor::Init_Implementation(const FRotator newRotation, const FVect
 	if (linkedDoor != nullptr)
 	{
 		targetLocation = linkedDoor->GetActorLocation() + targetOffset;
-		
+
 		switch (linkedDoor->RoomType)
 		{
 		case ERoomTypeEnum::ERT_Boss:
@@ -56,7 +56,7 @@ void AOublietteDoor::Init_Implementation(const FRotator newRotation, const FVect
 
 	this->SetActorRotation(newRotation);
 	this->DoorColour = doorColour;
-	
+
 	DoorMesh->SetVectorParameterValueOnMaterials(paramName, doorColour * 3.0f);
 }
 

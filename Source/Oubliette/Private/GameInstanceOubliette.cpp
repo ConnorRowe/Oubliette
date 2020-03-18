@@ -5,12 +5,12 @@
 
 void UGameInstanceOubliette::ApplySkillStatsAndBuffs()
 {
-	for (auto & Stat : SkillStats)
+	for (auto& Stat : SkillStats)
 	{
 		charRef->addToStat(Stat.StatType, Stat.StatAmount);
 	}
 
-	for (auto & Buff : SkillBuffs)
+	for (auto& Buff : SkillBuffs)
 	{
 		switch (Buff.Source)
 		{

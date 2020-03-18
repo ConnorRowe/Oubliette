@@ -11,7 +11,7 @@
 class AOublietteCharacter;
 
 /**
- * 
+ *
  */
 UCLASS()
 class OUBLIETTE_API AGameModeOubliette : public AGameModeBase
@@ -20,28 +20,28 @@ class OUBLIETTE_API AGameModeOubliette : public AGameModeBase
 
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
-	TArray<AActor*> allRooms;
+		TArray<AActor*> allRooms;
 	UPROPERTY(BlueprintReadWrite, Category = "Game Mode")
-	TArray<AActor*> allWallsDoors;
+		TArray<AActor*> allWallsDoors;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
-	TArray<FSpellProjectileStruct> Spells_Projectile;
+		TArray<FSpellProjectileStruct> Spells_Projectile;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
-	TArray<FSpellChannelStruct> Spells_Channel;
+		TArray<FSpellChannelStruct> Spells_Channel;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
-	TArray<FSpellHitScanStruct> Spells_HitScan;
+		TArray<FSpellHitScanStruct> Spells_HitScan;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Mode")
-	TArray<FSpellUtilStruct> Spells_Utility;
+		TArray<FSpellUtilStruct> Spells_Utility;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
-	FItemPoolStruct ItemPool_GeneralChest;
+		FItemPoolStruct ItemPool_GeneralChest;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
-	TArray<FItemStruct> ItemPool_Starter;
+		TArray<FItemStruct> ItemPool_Starter;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
-	TArray<FItemAffixStruct> ItemPrefixes;
+		TArray<FItemAffixStruct> ItemPrefixes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
-	TArray<FItemAffixStruct> ItemSuffixes;
+		TArray<FItemAffixStruct> ItemSuffixes;
 
 	UFUNCTION(BlueprintCallable, Category = "Items")
-	FItemStruct GenerateItemFromPool(const FItemPoolStruct ItemPool);
+		FItemStruct GenerateItemFromPool(const FItemPoolStruct ItemPool);
 
 	AOublietteCharacter* charRef;
 };

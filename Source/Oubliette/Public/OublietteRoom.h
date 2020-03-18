@@ -23,7 +23,7 @@ protected:
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Level Generation")
-	int32 roomType;
+		int32 roomType;
 
 	UPROPERTY(BlueprintReadWrite)
 		UStaticMeshComponent* FloorMesh;

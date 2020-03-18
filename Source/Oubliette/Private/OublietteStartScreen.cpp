@@ -13,41 +13,41 @@ TArray<FSaveSlotStruct> UOublietteStartScreen::SortSaves(TArray<FSaveSlotStruct>
 	{
 		swapped = false;
 
-        for (int i = 1; i <= length-1; ++i)
-        {
-            switch (SortMethod)
-            {
-            case ESortMethodEnum::ESME_Name:
-            {
+		for (int i = 1; i <= length - 1; ++i)
+		{
+			switch (SortMethod)
+			{
+			case ESortMethodEnum::ESME_Name:
+			{
 				//thankfully FName has a builtin compare function
-                if (SaveSlots[i-1].LineageName.Compare(SaveSlots[i].LineageName, ESearchCase::IgnoreCase) > 0)
-                    swapped = true;
-
-                break;
-            }
-            case ESortMethodEnum::ESME_Level:
-            {
-                //if there is a smaller element found to the right then swap
-                if (SaveSlots[i-1].LineageLevel > SaveSlots[i].LineageLevel)
-                    swapped = true;
-
-                break;
-            }
-            case ESortMethodEnum::ESME_DateTime:
-            {
-                if (SaveSlots[i-1].DTLastPlayed > SaveSlots[i].DTLastPlayed)
-                    swapped = true;
+				if (SaveSlots[i - 1].LineageName.Compare(SaveSlots[i].LineageName, ESearchCase::IgnoreCase) > 0)
+					swapped = true;
 
 				break;
-            }
-            }
+			}
+			case ESortMethodEnum::ESME_Level:
+			{
+				//if there is a smaller element found to the right then swap
+				if (SaveSlots[i - 1].LineageLevel > SaveSlots[i].LineageLevel)
+					swapped = true;
+
+				break;
+			}
+			case ESortMethodEnum::ESME_DateTime:
+			{
+				if (SaveSlots[i - 1].DTLastPlayed > SaveSlots[i].DTLastPlayed)
+					swapped = true;
+
+				break;
+			}
+			}
 
 			//If a swap should occur
 			if (swapped)
 			{
-				SaveSlots.SwapMemory(i-1, i);
+				SaveSlots.SwapMemory(i - 1, i);
 			}
-        }
+		}
 	}
 
 	//if it should be descending, reverse the array

@@ -170,14 +170,14 @@ struct FIconStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+		UTexture* Icon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	UTexture* Icon;
+		FLinearColor RColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	FLinearColor RColour;
+		FLinearColor GColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	FLinearColor GColour;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	FLinearColor BColour;
+		FLinearColor BColour;
 };
 
 USTRUCT(BlueprintType)
@@ -185,10 +185,10 @@ struct FActiveSpellStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Active Spell")
+		ESpellFormsEnum SpellType = ESpellFormsEnum::SFE_Projectile;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Active Spell")
-	ESpellFormsEnum SpellType = ESpellFormsEnum::SFE_Projectile;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Active Spell")
-	int32 SpellID = 0;
+		int32 SpellID = 0;
 };
 
 USTRUCT(BlueprintType)
@@ -196,10 +196,10 @@ struct FOffensiveSpellStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Offensive Spell")
+		ESpellFormsEnum SpellFormation = ESpellFormsEnum::SFE_Projectile;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Offensive Spell")
-	ESpellFormsEnum SpellFormation = ESpellFormsEnum::SFE_Projectile;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Offensive Spell")
-	ESpellElemsEnum SpellElement = ESpellElemsEnum::SEE_Fire;
+		ESpellElemsEnum SpellElement = ESpellElemsEnum::SEE_Fire;
 };
 
 USTRUCT(BlueprintType)
@@ -207,14 +207,14 @@ struct FSpellUtilStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility Spell")
+		ESpellUtilsEnum UtilitySpell;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility Spell")
-	ESpellUtilsEnum UtilitySpell;
+		UParticleSystem* HandParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility Spell")
-	UParticleSystem* HandParticle;
+		USoundCue* CastSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility Spell")
-	USoundCue* CastSound;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility Spell")
-	FLinearColor HandColour;
+		FLinearColor HandColour;
 };
 
 
@@ -223,20 +223,20 @@ struct FSpellProjectileStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
+		FName SpellName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
-	FName SpellName;
+		UParticleSystem* HandParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
-	UParticleSystem* HandParticle;
+		TSubclassOf<AOublietteSpell_Projectile> ProjectileClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
-	TSubclassOf<AOublietteSpell_Projectile> ProjectileClass;
+		USoundCue* CastSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
-	USoundCue* CastSound;
+		FLinearColor HandColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
-	FLinearColor HandColour;
+		float BaseDamage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
-	float BaseDamage;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
-	TSubclassOf<UDamageType> DamageType;
+		TSubclassOf<UDamageType> DamageType;
 };
 
 USTRUCT(BlueprintType)
@@ -244,22 +244,22 @@ struct FSpellChannelStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
+		FName SpellName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	FName SpellName;
+		UParticleSystem* HandParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	UParticleSystem* HandParticle;
+		FSoftObjectPath ChannelNiagaraSys;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	FSoftObjectPath ChannelNiagaraSys;
+		FSoftObjectPath DamageNiagaraSys;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	FSoftObjectPath DamageNiagaraSys;
+		USoundCue* LoopSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	USoundCue* LoopSound;
+		FLinearColor HandColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	FLinearColor HandColour;
+		float BaseDamagePerSec;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	float BaseDamagePerSec;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
-	TSubclassOf<UDamageType> DamageType;
+		TSubclassOf<UDamageType> DamageType;
 };
 
 USTRUCT(BlueprintType)
@@ -267,18 +267,18 @@ struct FSpellHitScanStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
+		FName SpellName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
-	FName SpellName;
+		UParticleSystem* HandParticle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
-	UParticleSystem* HandParticle;
+		USoundCue* CastSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
-	USoundCue* CastSound;
+		FLinearColor HandColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
-	FLinearColor HandColour;
+		float BaseDamage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
-	float BaseDamage;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
-	TSubclassOf<UDamageType> DamageType;
+		TSubclassOf<UDamageType> DamageType;
 };
 
 USTRUCT(BlueprintType)
@@ -286,10 +286,10 @@ struct FStatStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+		int32 StatAmount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	int32 StatAmount;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	EStatsEnum StatType;
+		EStatsEnum StatType;
 };
 
 USTRUCT(BlueprintType)
@@ -297,34 +297,34 @@ struct FItemStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+		int32 Rarity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	int32 Rarity;
+		FText Prefix;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FText Prefix;
+		FText Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FText Name;
+		FText Suffix;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FText Suffix;
+		EItemEffectEnum Effect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	EItemEffectEnum Effect;
+		float EffectMagnitude;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	float EffectMagnitude;
+		TArray<FStatStruct> Stats;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FStatStruct> Stats;
+		FText FlavourText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FText FlavourText;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	EItemTypeEnum ItemType;
+		EItemTypeEnum ItemType;
 
 	//visual stuff
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	UTexture* Icon;
+		UTexture* Icon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FLinearColor RColour;
+		FLinearColor RColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FLinearColor GColour;
+		FLinearColor GColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FLinearColor BColour;
+		FLinearColor BColour;
 
 };
 
@@ -333,36 +333,36 @@ struct FItemDataTableStruct : public FTableRowBase
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+		int32 id;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	int32 id;
+		int32 Rarity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	int32 Rarity;
+		FString Prefix = "rand";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FString Prefix = "rand";
+		FString Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FString Name;
+		FString Suffix = "rand";
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FString Suffix = "rand";
+		EItemEffectEnum Effect;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	EItemEffectEnum Effect;
+		float EffectMagnitude;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	float EffectMagnitude;
+		TArray<FStatStruct> Stats;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FStatStruct> Stats;
+		FText FlavourText;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FText FlavourText;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	EItemTypeEnum ItemType;
+		EItemTypeEnum ItemType;
 
 	//visual stuff
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	UTexture* Icon;
+		UTexture* Icon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FLinearColor RColour;
+		FLinearColor RColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FLinearColor GColour;
+		FLinearColor GColour;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FLinearColor BColour;
+		FLinearColor BColour;
 };
 
 USTRUCT(BlueprintType)
@@ -370,16 +370,16 @@ struct FItemPoolStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+		TArray<FItemStruct> Common;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FItemStruct> Common;
+		TArray<FItemStruct> Uncommon;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FItemStruct> Uncommon;
+		TArray<FItemStruct> Rare;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FItemStruct> Rare;
+		TArray<FItemStruct> Epic;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FItemStruct> Epic;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FItemStruct> Legendary;
+		TArray<FItemStruct> Legendary;
 };
 
 USTRUCT(BlueprintType)
@@ -387,10 +387,10 @@ struct FItemAffixStruct : public FTableRowBase
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+		FName Affix;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	FName Affix;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
-	TArray<FStatStruct> Stats;
+		TArray<FStatStruct> Stats;
 };
 
 USTRUCT(BlueprintType)
@@ -398,12 +398,12 @@ struct FTalentToolTipStructNEW
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Tooltip")
+		FString Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Tooltip")
-	FString Name;
+		FText Description;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Tooltip")
-	FText Description;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Tooltip")
-	FLinearColor BorderColour;
+		FLinearColor BorderColour;
 };
 
 USTRUCT(BlueprintType)
@@ -411,16 +411,16 @@ struct FAncestorStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+		FName FirstName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	FName FirstName;
+		int32 Level;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	int32 Level;
+		FDateTime DateTimeKilled;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	FDateTime DateTimeKilled;
+		FName KilledByName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	FName KilledByName;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	FName LevelName;
+		FName LevelName;
 };
 
 USTRUCT(BlueprintType)
@@ -428,38 +428,38 @@ struct FLineageSaveStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
+		int32 SaveID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	int32 SaveID;
+		FString FamilyName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	FString FamilyName;
+		int32 Level;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	int32 Level;
+		int32 Experience;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	int32 Experience;
+		int32 SkillPoints;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	int32 SkillPoints;
+		ERaceEnum Race;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	ERaceEnum Race;
+		FDateTime LastPlayed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	FDateTime LastPlayed;
+		FLinearColor SkinColor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	FLinearColor SkinColor;
+		ESpellFormsEnum OffensiveSpellType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	ESpellFormsEnum OffensiveSpellType;
+		ESpellElemsEnum SpellElement;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	ESpellElemsEnum SpellElement;
+		ESpellUtilsEnum UtilitySpell;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	ESpellUtilsEnum UtilitySpell;
+		TArray<FIntPoint> FormationTree;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	TArray<FIntPoint> FormationTree;
+		TArray<FIntPoint> ElementTree;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	TArray<FIntPoint> ElementTree;
+		TArray<FIntPoint> GeneralTree;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	TArray<FIntPoint> GeneralTree;
+		TArray<FAncestorStruct> Ancestors;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	TArray<FAncestorStruct> Ancestors;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lineage Save")
-	FName FirstName;
+		FName FirstName;
 };
 
 USTRUCT(BlueprintType)
@@ -467,16 +467,16 @@ struct FSaveSlotStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
+		int32 SaveID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
-	int32 SaveID;
+		int32 MetaID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
-	int32 MetaID;
+		FString LineageName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
-	FString LineageName;
+		int32 LineageLevel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
-	int32 LineageLevel;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save Slot")
-	FDateTime DTLastPlayed;
+		FDateTime DTLastPlayed;
 };
 
 USTRUCT(BlueprintType)
@@ -484,28 +484,28 @@ struct FBuffStruct
 {
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
+		EBuffEnum Buff;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	EBuffEnum Buff;
+		FName Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	FName Name;
+		EBuffSourceEnum Source;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	EBuffSourceEnum Source;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	EStatsEnum Stat;
+		EStatsEnum Stat;
 
 	// 0.0 on a val means it takes it from the skill's modified point value
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	float Chance;
+		float Chance;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	float Power;
+		float Power;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	float DurationSeconds;
-	
+		float DurationSeconds;
+
 	//Rendering stuff
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	bool isHidden;
+		bool isHidden;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Talent Buff")
-	FIconStruct BuffIcon;
+		FIconStruct BuffIcon;
 };
 
 
