@@ -694,6 +694,47 @@ void AOublietteCharacter::castSpellOffensive()
 	}
 }
 
+float AOublietteCharacter::getCastSpeed(const EHandEnum hand) const
+{
+	int index;
+	float speedModifier = (float)CastSpeed * 0.01f;
+	float baseSpeed = 1.0f;
+
+	switch (hand)
+	{
+	case EHandEnum::HE_Left:
+		baseSpeed = gm->Spells_Utility[(int)ActiveSpellLNew].CastSpeed;
+		break;
+
+	case EHandEnum::HE_Right:
+		index = (int)ActiveSpellRNew.SpellElement;
+
+		switch (ActiveSpellRNew.SpellFormation)
+		{
+		case ESpellFormsEnum::SFE_Channel:
+			baseSpeed = gm->Spells_Channel[index].CastSpeed;
+			break;
+		case ESpellFormsEnum::SFE_HitScan:
+			baseSpeed = gm->Spells_HitScan[index].CastSpeed;
+			break;
+		case ESpellFormsEnum::SFE_Projectile:
+			baseSpeed = gm->Spells_Projectile[index].CastSpeed;
+			break;
+		}
+		break;
+	}
+
+	return baseSpeed + (baseSpeed * speedModifier);
+}
+
+void AOublietteCharacter::resetSpellUtility()
+{
+	areaTarget->SetHiddenInGame(true);
+	targetDecal->SetHiddenInGame(true);
+	SM_SpellTargetArea->SetHiddenInGame(true);
+
+}
+
 //Returns the stat variable for the given Stat enum
 int32* AOublietteCharacter::GetStat(EStatsEnum Stat)
 {

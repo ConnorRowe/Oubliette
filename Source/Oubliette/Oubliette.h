@@ -215,6 +215,8 @@ struct FSpellUtilStruct
 		USoundCue* CastSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility Spell")
 		FLinearColor HandColour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Utility Spell")
+		float CastSpeed;
 };
 
 
@@ -237,6 +239,8 @@ struct FSpellProjectileStruct
 		float BaseDamage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
 		TSubclassOf<UDamageType> DamageType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile Spell")
+		float CastSpeed;
 };
 
 USTRUCT(BlueprintType)
@@ -260,6 +264,8 @@ struct FSpellChannelStruct
 		float BaseDamagePerSec;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
 		TSubclassOf<UDamageType> DamageType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Channel Spell")
+		float CastSpeed;
 };
 
 USTRUCT(BlueprintType)
@@ -279,6 +285,8 @@ struct FSpellHitScanStruct
 		float BaseDamage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
 		TSubclassOf<UDamageType> DamageType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hit Scan Spell")
+		float CastSpeed;
 };
 
 USTRUCT(BlueprintType)

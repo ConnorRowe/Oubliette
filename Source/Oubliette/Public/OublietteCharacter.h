@@ -195,6 +195,10 @@ public:
 		void finishSpellOffensive(const FOffensiveSpellStruct spell);
 	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
 		void castSpellOffensive();
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+		float getCastSpeed(const EHandEnum hand) const;
+	UFUNCTION(BlueprintCallable, Category = "Character | Spells")
+		void resetSpellUtility();
 
 	//Spell vars
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
