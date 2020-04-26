@@ -354,7 +354,7 @@ void ALevelGenerator::minimalSpanningTree(const TArray<FVector4> roomsIn, const 
 			{
 				foundNewEdge = true;
 			}
-			else
+			else if(shortestEdge != std::numeric_limits<float>::max())
 			{
 				edgeLimit = shortestEdge;
 			}

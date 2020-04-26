@@ -5,6 +5,10 @@
 
 constexpr float BASE_CHANNEL_TICKRATE = 0.4f;
 constexpr float BASE_PROJ_SPEED = 1000.0f;
+constexpr float MAX_PROJ_CHARGE_SIZE = 0.4f;
+constexpr float MIN_PROJ_CHARGE_SIZE = 0.05f;
+constexpr float MAX_PROJ_CHARGE_DMG = 2.0f;
+constexpr float MIN_PROJ_CHARGE_DMG = 0.5f;
 
 // Sets default values
 AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitializer)
@@ -94,6 +98,10 @@ AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitial
 	ChannelSpellNiagara = ObjectInitializer.CreateDefaultSubobject<UNiagaraComponent>(this, TEXT("ChannelSpellNiagara"));
 	ChannelSpellNiagara->SetupAttachment(spellPosR);
 	ChannelSpellNiagara->SetVisibility(false);
+
+	ProjPowerIndicator = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("ProjectilePowerIndicator"));
+	ProjPowerIndicator->SetupAttachment(spellPosR);
+
 }
 
 // Called when the game starts or when spawned
@@ -136,6 +144,21 @@ void AOublietteCharacter::Tick(float DeltaTime)
 		ChannelSpellNiagara->SetVariableVec3(TEXT("User.CylinderOffset"), FVector(lineTrace.Distance, 0.0f, 0.0f));
 
 		ChannelTarget = (lineTrace.Return_Value) ? lineTrace.Location : lineTrace.TraceEnd;
+	}
+
+	//Update projectile spell stuff
+	if (bIsAttackingR && ActiveSpellRNew.SpellFormation == ESpellFormsEnum::SFE_Projectile)
+	{
+		const float goalSize = (isProjPowerGrowing) ? MAX_PROJ_CHARGE_SIZE : MIN_PROJ_CHARGE_SIZE;
+		const float goalDmg = (isProjPowerGrowing) ? MAX_PROJ_CHARGE_DMG : MIN_PROJ_CHARGE_DMG;
+
+		ProjPowerIndicator->SetRelativeScale3D(FMath::Lerp(ProjPowerIndicator->GetRelativeScale3D(), FVector(goalSize), DeltaTime * 2));
+		projectilePower = FMath::Lerp(projectilePower, goalDmg, DeltaTime * 2);
+
+		if (FMath::IsNearlyEqual(projectilePower, goalDmg, .01f))
+		{
+			isProjPowerGrowing = !isProjPowerGrowing;
+		}
 	}
 }
 
@@ -615,6 +638,11 @@ void AOublietteCharacter::chargeSpellOffensive(const FOffensiveSpellStruct spell
 	}
 	case ESpellFormsEnum::SFE_Projectile:
 	{
+		//Reset projectile power stuff
+		ProjPowerIndicator->SetHiddenInGame(false);
+		ProjPowerIndicator->SetRelativeScale3D(FVector(MIN_PROJ_CHARGE_SIZE));
+		projectilePower = MIN_PROJ_CHARGE_DMG;
+		isProjPowerGrowing = true;
 
 		UGameplayStatics::PlaySoundAtLocation(this, SpellChargeCue, spellPosR->GetComponentLocation());
 
@@ -681,11 +709,18 @@ void AOublietteCharacter::castSpellOffensive()
 
 		projectileDmgActor->collisionComponent->IgnoreActorWhenMoving(this, true);
 
-		FSpellDamageCalc spellDmg = calcSpellDamage();
+		float spellDmg = calcSpellDamage().Damage * projectilePower;
 
-		projectileDmgActor->initProjectile(spellDmg.Damage, spellData.DamageType, BASE_PROJ_SPEED + (BASE_PROJ_SPEED * ProjSpeed * 0.01f), DoubleRadius * 0.01f);
+		FString projLog;
+		projLog = "Proj dmg: " + FString::SanitizeFloat(calcSpellDamage().Damage) + " * " + FString::SanitizeFloat(projectilePower) + " = " + FString::SanitizeFloat(spellDmg);
+		UE_LOG(LogTemp, Warning, TEXT("___ %s ___"), *projLog);
+
+
+		projectileDmgActor->initProjectile(spellDmg, spellData.DamageType, BASE_PROJ_SPEED + (BASE_PROJ_SPEED * ProjSpeed * 0.01f), DoubleRadius * 0.01f);
 
 		UGameplayStatics::PlaySoundAtLocation(this, spellData.CastSound, spellPosR->GetComponentLocation());
+
+		ProjPowerIndicator->SetHiddenInGame(true);
 
 		break;
 	}

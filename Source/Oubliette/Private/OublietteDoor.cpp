@@ -15,6 +15,13 @@ AOublietteDoor::AOublietteDoor(const FObjectInitializer& ObjectInitializer)
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorMeshObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_Portal.SM_Portal'"));
 	DoorMesh->SetStaticMesh(Cast<UStaticMesh>(DoorMeshObj.Object));
 
+	SigilMesh = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("SigilMesh"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SigilSkullMeshObj(TEXT("StaticMesh'/Game/Meshes/Static/SM_DemonSkull.SM_DemonSkull'"));
+	SigilMesh->SetupAttachment(DoorMesh);
+	SigilMesh->SetStaticMesh(Cast<UStaticMesh>(SigilSkullMeshObj.Object));
+	SigilMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 356.423096f));
+	SigilMesh->SetHiddenInGame(true);
+
 }
 
 // Called when the game starts or when spawned
@@ -44,6 +51,7 @@ void AOublietteDoor::Init_Implementation(const FRotator newRotation, const FVect
 		{
 		case ERoomTypeEnum::ERT_Boss:
 			doorColour = FVector(1.0f, 0.0f, 0.0f);
+			SigilMesh->SetHiddenInGame(false);
 			break;
 		case ERoomTypeEnum::ERT_Treasure:
 			doorColour = FVector(1.0f, 0.866667f, 0.0f);

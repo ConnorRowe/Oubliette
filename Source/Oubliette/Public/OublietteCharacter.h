@@ -29,6 +29,8 @@
 #include "Engine/Classes/Components/AudioComponent.h"
 #include "OublietteCharacter.generated.h"
 
+enum class EProjChargeState : uint8 { PCS_Grow, PCS_Shrink };
+
 USTRUCT(BlueprintType)
 struct FLineTraceData
 {
@@ -92,6 +94,7 @@ private:
 	float BaseSpellDamage;
 	UWorld* w;
 	UAudioComponent* channelSound;
+	bool isProjPowerGrowing = true;
 
 protected:
 	// Called when the game starts or when spawned
@@ -127,6 +130,8 @@ public:
 		UStaticMeshComponent* SM_SpellTargetArea;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		UNiagaraComponent* ChannelSpellNiagara;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		UStaticMeshComponent* ProjPowerIndicator;
 
 	//Buff events
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
@@ -219,6 +224,8 @@ public:
 		AOublietteSpell_HitScan* hitscanDmgActor;
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 		AOublietteSpell_Projectile* projectileDmgActor;
+	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
+		float projectilePower;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Character | Spells")
 		EHandEnum HandEnumNEW = EHandEnum::HE_Left;
@@ -232,7 +239,7 @@ public:
 		UNiagaraSystem* ChannelNiagaraAsset;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
 		UNiagaraSystem* DamageNiagaraAsset;
-		USoundCue* SpellChargeCue;
+	USoundCue* SpellChargeCue;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")
 		TSubclassOf<AOublietteSpell_Channel> BP_SpellChannel;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character | Spells")

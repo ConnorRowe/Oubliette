@@ -30,8 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 		void Init(const FRotator newRotation, const FVector targetOffset);
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		UStaticMeshComponent* DoorMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		UStaticMeshComponent* SigilMesh;
 
 	UPROPERTY(BlueprintReadWrite)
 		FVector targetLocation = FVector(0.0f);
