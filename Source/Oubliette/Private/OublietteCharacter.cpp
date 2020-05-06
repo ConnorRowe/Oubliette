@@ -716,7 +716,7 @@ void AOublietteCharacter::castSpellOffensive()
 		UE_LOG(LogTemp, Warning, TEXT("___ %s ___"), *projLog);
 
 
-		projectileDmgActor->initProjectile(spellDmg, spellData.DamageType, BASE_PROJ_SPEED + (BASE_PROJ_SPEED * ProjSpeed * 0.01f), DoubleRadius * 0.01f);
+		projectileDmgActor->initProjectile(spellDmg, spellData.DamageType, BASE_PROJ_SPEED + (BASE_PROJ_SPEED * ProjSpeed * 0.01f), DoubleRadius * 0.01f, projectilePower);
 
 		UGameplayStatics::PlaySoundAtLocation(this, spellData.CastSound, spellPosR->GetComponentLocation());
 

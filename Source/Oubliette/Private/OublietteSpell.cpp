@@ -3,6 +3,14 @@
 
 #include "OublietteSpell.h"
 
+AOublietteSpell::AOublietteSpell(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	SM_ExplosionDisplay = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("SM_ExplosionDisplay"));
+
+	SM_ExplosionDisplay->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 void AOublietteSpell::init(float Damage, TSubclassOf<UDamageType> DamageType)
 {
 	spellDamage = Damage;

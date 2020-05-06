@@ -9,13 +9,16 @@ void AOublietteSpell_HitScan::initHitScan_Implementation(float CalcedDamage, TSu
 {
 	init(CalcedDamage, Element);
 	doubleExplodeChance = DoubleExplodeChance;
+
+	//Calculates if it is double radius or not
+	damageRadius = (FMath::FRand() < doubleExplodeChance) ? BASE_DMG_RADIUS : BASE_DMG_RADIUS * 2.0f;
 }
 
 void AOublietteSpell_HitScan::dealDamage()
 {
 	const TArray<AActor*> ignoredActors = TArray<AActor*>({ Cast<AActor>(GetInstigator()) });
 
-	UGameplayStatics::ApplyRadialDamage(this, spellDamage, this->GetActorLocation(), (FMath::FRand() < doubleExplodeChance) ? BASE_DMG_RADIUS : BASE_DMG_RADIUS * 2, damageType, ignoredActors, Cast<AActor>(GetInstigator()));
+	UGameplayStatics::ApplyRadialDamage(this, spellDamage, this->GetActorLocation(), damageRadius, damageType, ignoredActors, Cast<AActor>(GetInstigator()));
 
 	UGameplayStatics::PlaySoundAtLocation(this, SpellExplosionCue, this->GetActorLocation());
 }

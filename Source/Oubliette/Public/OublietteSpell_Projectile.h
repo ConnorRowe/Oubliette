@@ -20,8 +20,8 @@ public:
 
 public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Spells")
-		void initProjectile(float CalcedDamage, TSubclassOf<UDamageType> Element, float ProjectileSpeed, float DoubleExplodeChance);
-	virtual void initProjectile_Implementation(float CalcedDamage, TSubclassOf<UDamageType> Element, float ProjectileSpeed, float DoubleExplodeChance);
+		void initProjectile(float CalcedDamage, TSubclassOf<UDamageType> Element, float ProjectileSpeed, float DoubleExplodeChance, float ProjectilePower);
+	virtual void initProjectile_Implementation(float CalcedDamage, TSubclassOf<UDamageType> Element, float ProjectileSpeed, float DoubleExplodeChance, float ProjectilePower);
 
 	UPROPERTY(BlueprintReadWrite, Category = "Spells")
 		float projectileSpeed;
