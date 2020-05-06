@@ -2,6 +2,7 @@
 
 
 #include "GameInstanceOubliette.h"
+#include "OublietteCharacter.h"
 
 void UGameInstanceOubliette::ApplySkillStatsAndBuffs()
 {

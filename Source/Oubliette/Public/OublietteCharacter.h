@@ -11,6 +11,7 @@
 #include "MyDamageType_Shadow.h"
 #include "MyDamageType_Shock.h"
 #include "GameModeOubliette.h"
+#include "GameInstanceOubliette.h"
 #include "CollisionQueryParams.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/DamageType.h"
@@ -91,6 +92,7 @@ private:
 	FGenericTeamId TeamId;
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	AGameModeOubliette* gm;
+	UGameInstanceOubliette* gi;
 	float BaseSpellDamage;
 	UWorld* w;
 	UAudioComponent* channelSound;

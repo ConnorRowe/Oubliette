@@ -22,6 +22,7 @@ AOublietteCharacter::AOublietteCharacter(const FObjectInitializer& ObjectInitial
 	{
 		w = GetWorld();
 		gm = (AGameModeOubliette*)w->GetAuthGameMode();
+		gi = (UGameInstanceOubliette*)w->GetGameInstance();
 	}
 
 	//Asset loading
@@ -249,6 +250,12 @@ void AOublietteCharacter::calculateStats()
 		{
 			addToStat(Stat.StatType, Stat.StatAmount);
 		}
+	}
+
+	//Parse SkillStats array to find stats
+	for (auto& Stat : gi->SkillStats)
+	{
+		addToStat(Stat.StatType, Stat.StatAmount);
 	}
 
 	//Calculate Mana --- 1 extra mana per intellect

@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "OublietteCharacter.h"
 #include "Oubliette.h"
 #include "Engine/GameInstance.h"
 #include "GameInstanceOubliette.generated.h"
+
+//~~~ Forward Declarations
+class AOublietteCharacter;
 
 /**
  *
